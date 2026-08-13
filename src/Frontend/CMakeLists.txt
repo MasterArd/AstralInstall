@@ -22,3 +22,17 @@ target_link_libraries(MyAppFrontend
     Qt6::Gui
     Qt6::Quick
 )
+
+# Qt-DLLs und QML-Plugins neben die Exe kopieren, damit sie startbar ist
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt
+    HINTS "${Qt6_DIR}/../../../bin"
+)
+
+if(WIN32 AND WINDEPLOYQT_EXECUTABLE)
+    add_custom_command(TARGET MyAppFrontend POST_BUILD
+        COMMAND "${WINDEPLOYQT_EXECUTABLE}"
+                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                "$<TARGET_FILE:MyAppFrontend>"
+        COMMENT "Deploying Qt runtime next to MyAppFrontend.exe"
+    )
+endif()
