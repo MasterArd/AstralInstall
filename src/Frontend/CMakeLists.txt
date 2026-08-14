@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 COMPONENTS Core Gui Quick QuickControls2 REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Quick QuickControls2 Qml REQUIRED)
 
 # Automatisch alle .cpp und .h Dateien sammeln
 file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
@@ -24,6 +24,7 @@ target_link_libraries(MyAppFrontend
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::Qml
 )
 
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt
@@ -33,7 +34,7 @@ find_program(WINDEPLOYQT_EXECUTABLE windeployqt
 if(WIN32 AND WINDEPLOYQT_EXECUTABLE)
     add_custom_command(TARGET MyAppFrontend POST_BUILD
         COMMAND "${WINDEPLOYQT_EXECUTABLE}"
-                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}"
                 "$<TARGET_FILE:MyAppFrontend>"
         COMMENT "Deploying Qt runtime"
     )
