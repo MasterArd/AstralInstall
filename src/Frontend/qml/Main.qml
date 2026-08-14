@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import QtQuick.Controls
 
 Window {
     width: 800
@@ -7,15 +8,24 @@ Window {
     visible: true
     title: "Astral"
     
-    Rectangle {
-        anchors.fill: parent
-        color: "#1e1e2e"
-        
-        Text {
-            anchors.centerIn: parent
-            text: "Hello Astral!"
-            color: "white"
-            font.pixelSize: 24
-        }
+    Row {
+        Button { 
+            text: "Shop" 
+            width: 100
+            height: 40
+            font.pixelSize: 16
+            hoverEnabled: false
+
+            onClicked: gamemanager.currentPage = 1
+            }
+        Button { 
+            text: "My games" 
+            width: 150
+            height: 40
+            font.pixelSize: 16
+            hoverEnabled: false
+
+            onClicked: gamemanager.currentPage = 2
+            }
     }
 }
