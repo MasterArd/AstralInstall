@@ -1,9 +1,11 @@
 package network
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
+	"regexp"
+	//"text/template/parse"
 )
 
 type Release struct {
@@ -12,16 +14,31 @@ type Release struct {
 	URL     string `json:"html_url"`
 }
 
+// Matches: [https://][www.]github.com/{owner}/{repo}[...]
+var githubRegex = regexp.MustCompile(`(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/.]+)(?:\.git)?`)
+func ParseWithRegex(rawURL string) (owner, repo string, err error) {
+	matches := githubRegex.FindStringSubmatch(rawURL)
+	if len(matches) < 3 {
+		return "", "", fmt.Errorf("invalid github URL")
+	}
+	return matches[1], matches[2], nil
+}
 
+func ReturnMatches(url string) {
+	owner, repo, err := ParseWithRegex("urlname")
+	if err == nil {
+		fmt.Printf("Owner: %s, Repo: %s\n", owner, repo)
+	}
+	
+}
 
-
-
-func GetLatest(username string, reponame string) {
+func GetLatest(username string, reponame string)  {
 	resp, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", username, reponame))
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
+
 
 	if resp.StatusCode != http.StatusOK {
 		panic(fmt.Sprintf("GitHub returned %s", resp.Status))
