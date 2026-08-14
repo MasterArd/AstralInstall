@@ -7,7 +7,7 @@ class GameManager : public QObject {
     Q_OBJECT
 
 public:
-    enum Page { Shop = 0, MyGames = 1};
+    enum Page { library = 0, MyGames = 1};
     Q_ENUM(Page)
 
 private:
@@ -28,7 +28,7 @@ signals:
     void pageChanged();
     
 private:
-    Page m_currentPage = Shop;
+    Page m_currentPage = library;
 };
 
 #endif

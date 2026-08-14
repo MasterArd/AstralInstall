@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
+import QtQuick.Layouts
 
 Window {
     width: 800
@@ -9,14 +10,15 @@ Window {
     title: "Astral"
     
     Row {
-        Button { 
-            text: "Shop" 
+        id: navBar
+        Button {
+            text: "library" 
             width: 100
             height: 40
             font.pixelSize: 16
             hoverEnabled: false
 
-            onClicked: gamemanager.currentPage = 1
+            onClicked: gameManager.currentPage = 0
             }
         Button { 
             text: "My games" 
@@ -25,7 +27,17 @@ Window {
             font.pixelSize: 16
             hoverEnabled: false
 
-            onClicked: gamemanager.currentPage = 2
+            onClicked: gameManager.currentPage = 1
             }
+    }
+    StackLayout {
+        anchors.top: navBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        currentIndex: gameManager.currentPage
+
+        Library { }
+        MyGamesPage { }
     }
 }
