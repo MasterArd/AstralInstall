@@ -1,3 +1,6 @@
 build/
 .vscode/settings.json
 temp/
+
+# Go backend build output (Backend on Linux, Backend.exe on Windows)
+src/Backend/Backend*
