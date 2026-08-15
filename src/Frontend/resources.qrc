@@ -4,5 +4,7 @@
         <file>qml/Main.qml</file>
         <file>qml/Library.qml</file>
         <file>qml/MyGamesPage.qml</file>
+        <file>qml/Colors.qml</file>
+        <file>qml/qmldir</file>
     </qresource>
 </RCC>

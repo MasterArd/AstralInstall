@@ -1,15 +1,21 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQmlEngine>
 #include "gamemanager.h"
 #include "backendbridge.h"
+#include "settings.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
+    QCoreApplication::setOrganizationName(QStringLiteral("AstralInstall"));
+    QCoreApplication::setApplicationName(QStringLiteral("AstralInstall"));
+
     GameManager gameManager;
     BackendBridge backend;
+    Settings settings;
 
     QObject::connect(&backend, &BackendBridge::releaseChecked,
                      [](const QString &repo, const QString &version) {
@@ -32,6 +38,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("gameManager", &gameManager);
     engine.rootContext()->setContextProperty("backend", &backend);
+
+    // Registered as a proper QML singleton rather than a context
+    // property, so Colors.qml can import it.
+    qmlRegisterSingletonInstance("AstralInstall", 1, 0, "Settings", &settings);
 
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     engine.load(url);
