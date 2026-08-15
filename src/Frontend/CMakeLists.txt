@@ -27,6 +27,22 @@ target_link_libraries(MyAppFrontend
     Qt6::Qml
 )
 
+# Build the Go backend and drop the binary next to the frontend
+# executable, so BackendBridge can find it via applicationDirPath().
+# Named "Backend" / "Backend.exe" to match what "go build ." produces.
+find_program(GO_EXECUTABLE go)
+
+if(GO_EXECUTABLE)
+    add_custom_command(TARGET MyAppFrontend POST_BUILD
+        COMMAND "${GO_EXECUTABLE}" build
+                -o "$<TARGET_FILE_DIR:MyAppFrontend>/Backend${CMAKE_EXECUTABLE_SUFFIX}" .
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../Backend"
+        COMMENT "Building Go backend"
+    )
+else()
+    message(WARNING "go not found in PATH - the backend will not be built")
+endif()
+
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt
     HINTS "${Qt6_DIR}/../../../bin"
 )
