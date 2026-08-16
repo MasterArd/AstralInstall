@@ -1,5 +1,8 @@
 package protocol
 
+import "log"
+
 func ProtocolInit() {
-	ImportTest()
+	log.Println("Starting FrontendLineReader")
+	FrontendLineReader()
 }
