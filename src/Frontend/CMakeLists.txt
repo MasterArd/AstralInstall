@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)  # 3.25 fuer 'cmake -E env --modify'
 project(MyAppFrontend)
 
 # Hard-coded Qt location for this Windows box. Elsewhere (or when passed on
@@ -42,9 +42,15 @@ find_program(GO_EXECUTABLE go)
 file(GLOB CGO_COMPILER_HINTS "${Qt6_DIR}/../../../../../Tools/mingw*/bin")
 find_program(CGO_C_COMPILER NAMES gcc clang HINTS ${CGO_COMPILER_HINTS})
 
+# gcc startet cc1.exe und collect2.exe, die libwinpthread-1.dll aus dem
+# bin-Verzeichnis des Compilers brauchen. Fehlt das im PATH, brechen sie
+# ohne jede Fehlermeldung mit exit 1 ab. Darum PATH ergaenzen.
+get_filename_component(CGO_COMPILER_DIR "${CGO_C_COMPILER}" DIRECTORY)
+
 if(GO_EXECUTABLE AND CGO_C_COMPILER)
     add_custom_command(TARGET MyAppFrontend POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E env
+                --modify "PATH=path_list_prepend:${CGO_COMPILER_DIR}"
                 CGO_ENABLED=1 "CC=${CGO_C_COMPILER}"
                 "${GO_EXECUTABLE}" build
                 -o "$<TARGET_FILE_DIR:MyAppFrontend>/Backend${CMAKE_EXECUTABLE_SUFFIX}" .
