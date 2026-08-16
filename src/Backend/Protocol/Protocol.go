@@ -28,7 +28,7 @@ func ImportTest() {
 
 func RequestTest() {
 	// the following line is just an example
-    release, err := network.GetLatest("https://github.com/MasterArd/CGTerm")
+    release, err := network.GetLatest("https://github.com/hannes-swd/code-miner")
     if err != nil {
         fmt.Println("Error:", err)
         return
@@ -59,6 +59,8 @@ func FrontendLineReader() {
         switch request.Action {
         case "check_release":
             handleCheckRelease(request)
+        case "download_newest":
+            
         default:
             writeResponse(Response{
                 Success: false,

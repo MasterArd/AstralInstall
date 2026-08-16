@@ -1,10 +1,12 @@
 package main
 
 import (
+	common "Backend/Common"
 	network "Backend/Network"
 	protocol "Backend/Protocol"
 	"flag"
 	"log"
+	"fmt"
 )
 
 func main() {
@@ -19,7 +21,8 @@ func main() {
 		log.Println()
 		network.GithubPingTest()
 		log.Println()
-		network.GetLatest("https://github.com/MasterArd/example")
+		network.GetLatest("https://github.com/hannes-swd/code-miner")
+		fmt.Println("random seed is:",common.Seed())
 	} else {
 		protocol.FrontendLineReader()
 	}
