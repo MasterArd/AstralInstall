@@ -82,6 +82,63 @@ Rectangle {
                         Text { text: "Action"; color: "white"; font.pointSize: 15 }
                     }
                 }
+                /*
+                    PLATFORM
+                */
+                Column {
+                    id: platforms
+                    width: parent.width
+                    spacing: 10
+                    
+                    property bool platformsOpen: true
+                    
+                    // HEADER
+                    Rectangle {
+                        width: parent.width
+                        height: 40
+                        color: "transparent"
+                        
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "platforms"
+                            color: "white"
+                            font.pointSize: 20
+                        }
+                        
+                        Image {
+                            id: platformsArrow
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: parent.right
+                            source: platforms.platformsOpen
+                                    ? "qrc:/assets/symboles/dropdown_up.png"
+                                    : "qrc:/assets/symboles/dropdown_down.png"
+                            sourceSize.height: 24
+                            fillMode: Image.PreserveAspectFit
+                            visible: false
+                        }
+
+                        MultiEffect {
+                            source: platformsArrow
+                            anchors.fill: platformsArrow
+                            brightness: 1.0
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: platforms.platformsOpen = !platforms.platformsOpen
+                        }
+                    }
+                    
+                    // CONTENT
+                    Column {
+                        width: parent.width
+                        spacing: 5
+                        visible: platforms.platformsOpen
+                        
+                        Text { text: "Windows"; color: "white"; font.pointSize: 15 }
+                        Text { text: "Linux"; color: "white"; font.pointSize: 15 }
+                    }
+                }
             }
         }
         //main part

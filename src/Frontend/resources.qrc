@@ -8,6 +8,5 @@
         <file>qml/qmldir</file>
         <file alias="assets/symboles/dropdown_down.png">assets/symboles/dropdown down.png</file>
         <file alias="assets/symboles/dropdown_up.png">assets/symboles/dropdown up.png</file>
-        <file alias="assets/symboles/checkbox.png">assets/symboles/checkbox.png</file>
     </qresource>
 </RCC>
