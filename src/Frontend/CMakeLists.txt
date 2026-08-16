@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(MyAppFrontend)
 
-set(Qt6_DIR "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6")
+# Hard-coded Qt location for this Windows box. Elsewhere (or when passed on
+# the command line via -DQt6_DIR=...) let CMake find Qt itself.
+if(WIN32 AND NOT DEFINED Qt6_DIR)
+    set(Qt6_DIR "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
@@ -32,15 +36,25 @@ target_link_libraries(MyAppFrontend
 # Named "Backend" / "Backend.exe" to match what "go build ." produces.
 find_program(GO_EXECUTABLE go)
 
-if(GO_EXECUTABLE)
+# Common/Seed.go uses cgo, so the backend needs CGO_ENABLED=1 and a
+# gcc-compatible compiler (cgo does not work with MSVC). Qt ships a MinGW
+# toolchain, so fall back to that when gcc is not in PATH.
+file(GLOB CGO_COMPILER_HINTS "${Qt6_DIR}/../../../../../Tools/mingw*/bin")
+find_program(CGO_C_COMPILER NAMES gcc clang HINTS ${CGO_COMPILER_HINTS})
+
+if(GO_EXECUTABLE AND CGO_C_COMPILER)
     add_custom_command(TARGET MyAppFrontend POST_BUILD
-        COMMAND "${GO_EXECUTABLE}" build
+        COMMAND "${CMAKE_COMMAND}" -E env
+                CGO_ENABLED=1 "CC=${CGO_C_COMPILER}"
+                "${GO_EXECUTABLE}" build
                 -o "$<TARGET_FILE_DIR:MyAppFrontend>/Backend${CMAKE_EXECUTABLE_SUFFIX}" .
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../Backend"
         COMMENT "Building Go backend"
     )
-else()
+elseif(NOT GO_EXECUTABLE)
     message(WARNING "go not found in PATH - the backend will not be built")
+else()
+    message(WARNING "no gcc/clang found for cgo - the backend will not be built")
 endif()
 
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt
