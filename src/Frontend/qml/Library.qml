@@ -77,9 +77,9 @@ Rectangle {
                         spacing: 5
                         visible: genres.genresOpen
                         
-                        Text { text: "Horror"; color: "white"; font.pointSize: 15 }
-                        Text { text: "Simulation"; color: "white"; font.pointSize: 15 }
-                        Text { text: "Action"; color: "white"; font.pointSize: 15 }
+                        FilterCheckBox { text: "Horror" }
+                        FilterCheckBox { text: "Simulation" }
+                        FilterCheckBox { text: "Action" }
                     }
                 }
                 /*
@@ -135,8 +135,8 @@ Rectangle {
                         spacing: 5
                         visible: platforms.platformsOpen
                         
-                        Text { text: "Windows"; color: "white"; font.pointSize: 15 }
-                        Text { text: "Linux"; color: "white"; font.pointSize: 15 }
+                        FilterCheckBox { text: "Windows" }
+                        FilterCheckBox { text: "Linux" }
                     }
                 }
             }

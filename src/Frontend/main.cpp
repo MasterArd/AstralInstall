@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QQuickStyle>
 #include "gamemanager.h"
 #include "backendbridge.h"
 #include "settings.h"
@@ -9,6 +10,11 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+
+    // Der native Windows-Style zeichnet seine eigenen Indikatoren und
+    // ignoriert Anpassungen (z.B. in FilterCheckBox.qml). "Basic" ist
+    // voll anpassbar und sieht auf Windows und Linux gleich aus.
+    QQuickStyle::setStyle(QStringLiteral("Basic"));
 
     QCoreApplication::setOrganizationName(QStringLiteral("AstralInstall"));
     QCoreApplication::setApplicationName(QStringLiteral("AstralInstall"));
