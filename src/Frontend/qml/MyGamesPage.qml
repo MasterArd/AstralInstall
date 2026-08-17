@@ -1,12 +1,54 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
+
 
 Rectangle {
-    color: "#f0f0f0"
+    color: Colors.maincolor
     
-    Text {
-        text: "my games"
-        font.pixelSize: 24
-        anchors.centerIn: parent
+    Rectangle {
+        width: parent.width
+        height: parent.height
+        
+        // CONTENT (oben)
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: parent.height - 60
+            color: Colors.maincolor
+
+            
+        }
+        
+        // FOOTER (unten)
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 60
+            color: Colors.color3
+
+            
+            ProgressBar {
+                width: parent.width - 20
+                height: 10
+                value: 0.45  // 45%
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+
+                background: Rectangle {
+                    color: "#333"
+                    radius: 5
+                }
+                
+                contentItem: Rectangle {
+                    width: parent.width * parent.value
+                    color: "#004900"
+                    radius: 5
+                }
+            }
+            
+        }
     }
 }
