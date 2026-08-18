@@ -27,7 +27,7 @@ CheckBox {
         x: control.leftPadding
         anchors.verticalCenter: parent.verticalCenter
         radius: 3
-        color: control.checked ? Qt.lighter(Colors.maincolor, 1.6) : "transparent"
+        color: control.checked ? Qt.lighter(Colors.color1, 1.6) : "transparent"
         border.width: 2
         border.color: control.checked || control.hovered ? "white" : "#a0a0a0"
 

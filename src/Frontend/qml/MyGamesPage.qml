@@ -4,7 +4,7 @@ import QtQuick.Controls
 
 
 Rectangle {
-    color: Colors.maincolor
+    color: Colors.color1
     
     Rectangle {
         width: parent.width
@@ -16,7 +16,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
             height: parent.height - 60
-            color: Colors.maincolor
+            color: Colors.color1
 
             
         }
@@ -44,7 +44,7 @@ Rectangle {
                 
                 contentItem: Rectangle {
                     width: parent.width * parent.value
-                    color: "#004900"
+                    color: Colors.color3
                     radius: 5
                 }
             }

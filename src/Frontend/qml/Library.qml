@@ -4,7 +4,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 
 Rectangle {
-    color: Colors.maincolor
+    color: Colors.color1
 
     RowLayout {
         anchors.fill: parent
