@@ -11,7 +11,7 @@ Window {
     visible: true
     title: "Astral"
     color: Colors.color3
-    
+
     RowLayout {
         id: navBar
         anchors.left: parent.left
@@ -107,6 +107,11 @@ Window {
                     maskEnabled: true
                     maskSource: dotsMask
                 }
+            }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: testConsole.show()
             }
         }
     }

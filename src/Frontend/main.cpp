@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -6,10 +6,12 @@
 #include "gamemanager.h"
 #include "backendbridge.h"
 #include "settings.h"
+#include "testconsole.h"
+
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     // Der native Windows-Style zeichnet seine eigenen Indikatoren und
     // ignoriert Anpassungen (z.B. in FilterCheckBox.qml). "Basic" ist
@@ -22,6 +24,8 @@ int main(int argc, char *argv[])
     GameManager gameManager;
     BackendBridge backend;
     Settings settings;
+    TestConsole testConsole;
+
 
     QObject::connect(&backend, &BackendBridge::releaseChecked,
                      [](const QString &repo, const QString &version) {
@@ -44,6 +48,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("gameManager", &gameManager);
     engine.rootContext()->setContextProperty("backend", &backend);
+    engine.rootContext()->setContextProperty("testConsole", &testConsole);
 
     // Registered as a proper QML singleton rather than a context
     // property, so Colors.qml can import it.
