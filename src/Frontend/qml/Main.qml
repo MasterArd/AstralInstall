@@ -10,8 +10,13 @@ Window {
     title: "Astral"
     color: Colors.color3
     
-    Row {
+    RowLayout {
         id: navBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 40
+        spacing: 10
+
         Button {
             text: "library" 
             width: 100
@@ -34,7 +39,7 @@ Window {
             }
 
             onClicked: gameManager.currentPage = 0
-            }
+        }
         Button { 
             text: "My games" 
             
@@ -58,8 +63,28 @@ Window {
             }
 
             onClicked: gameManager.currentPage = 1
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        TextField {
+            id: searchField
+            width: 200
+            height: 40
+            color: colors.color3
+            placeholderText: "Search..."
+
+            background: Rectangle {
+                radius: 5 
+                color: "white"
+                border.color: "#005a05"
+                border.width: 1
             }
+        }
     }
+    
     StackLayout {
         anchors.top: navBar.bottom
         anchors.left: parent.left

@@ -44,7 +44,7 @@ Rectangle {
                 
                 contentItem: Rectangle {
                     width: parent.width * parent.value
-                    color: Colors.color3
+                    color: Colors.color1
                     radius: 5
                 }
             }
