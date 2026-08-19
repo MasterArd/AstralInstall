@@ -7,6 +7,7 @@
         <file>qml/Colors.qml</file>
         <file>qml/FilterCheckBox.qml</file>
         <file>qml/qmldir</file>
+        <file>assets/symboles/dots.png</file>
         <file alias="assets/symboles/dropdown_down.png">assets/symboles/dropdown down.png</file>
         <file alias="assets/symboles/dropdown_up.png">assets/symboles/dropdown up.png</file>
     </qresource>

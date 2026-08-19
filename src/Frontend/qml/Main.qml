@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
+
 
 Window {
     width: 800
@@ -71,9 +73,9 @@ Window {
 
         TextField {
             id: searchField
-            width: 200
-            height: 40
-            color: colors.color3
+            Layout.preferredWidth: 200
+            Layout.preferredHeight: 40
+            color: Colors.color3
             placeholderText: "Search..."
 
             background: Rectangle {
@@ -81,6 +83,30 @@ Window {
                 color: "white"
                 border.color: "#005a05"
                 border.width: 1
+            }
+        }
+        Item {
+            Layout.preferredWidth: 24
+            Layout.preferredHeight: 24
+            Layout.alignment: Qt.AlignVCenter
+            Layout.rightMargin: 10
+
+            Image {
+                id: dotsMask
+                anchors.fill: parent
+                source: "qrc:/assets/symboles/dots.png"
+                sourceSize.height: 24
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            Rectangle {
+                anchors.fill: parent
+                color: "white"
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: dotsMask
+                }
             }
         }
     }
