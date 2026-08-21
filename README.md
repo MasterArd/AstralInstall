@@ -47,7 +47,7 @@ The frontend and backend communicate exclusively through **JSON messages over st
 The C++ frontend sends JSON-encoded requests to the backend through `stdin`:
 
 ```json
-{"action": "check_release", "repo": "https://github.com/MasterArd/CGTerm"}
+{"action": "check_release", "repo": "https://github.com/hannes-swd/code-miner"}
 ```
 
 #### 2. **Backend Processing**
@@ -104,7 +104,7 @@ type Response struct {
 
 **Request Example**:
 ```json
-{"action": "check_release", "repo": "https://github.com/MasterArd/CGTerm"}
+{"action": "check_release", "repo": "https://github.com/hannes-swd/code-miner"}
 ```
 
 **Response (Success)**:
