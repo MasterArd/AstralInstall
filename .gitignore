@@ -4,3 +4,7 @@ temp/
 
 # Go backend build output (Backend on Linux, Backend.exe on Windows)
 src/Backend/Backend*
+
+# Enthaelt das GitHub Client Secret - niemals committen
+HANDOFF-Firebase-Auth.md
+auth.json
