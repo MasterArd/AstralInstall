@@ -1,6 +1,6 @@
 #include "testconsole.h"
 #include <QVBoxLayout>
-#include <QFont>
+#include <QFontDatabase>
 
 TestConsole::TestConsole(QWidget *parent)
     : QDialog(parent)
@@ -11,7 +11,10 @@ TestConsole::TestConsole(QWidget *parent)
     // Output area
     output = new QPlainTextEdit();
     output->setReadOnly(true);
-    QFont font("Courier", 10);
+    // Nicht "Courier" hart verdrahten - den Namen gibt es auf Linux oft
+    // nicht. Qt liefert hier den Monospace-Font des jeweiligen Systems.
+    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    font.setPointSize(10);
     output->setFont(font);
     output->appendPlainText("=== Test Console ===");
     output->appendPlainText("Type 'help' for commands\n");

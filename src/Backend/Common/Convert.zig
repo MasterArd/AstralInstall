@@ -23,17 +23,17 @@ pub fn formatBytes(bytes: u64, buf: []u8) ![]const u8 {
 
 // --- C Export Wrappers ---
 
-export fn zig_format_bytes(bytes: u64, out_buf: [*]u8, out_len: usize) callconv(.C) i32 {
+export fn zig_format_bytes(bytes: u64, out_buf: [*]u8, out_len: usize) callconv(.c) i32 {
     const result = formatBytes(bytes, out_buf[0..out_len]) catch return -1;
     return @intCast(result.len);
 }
 
-export fn zig_format_mb_to_gb(mb: f64, out_buf: [*]u8, out_len: usize) callconv(.C) i32 {
+export fn zig_format_mb_to_gb(mb: f64, out_buf: [*]u8, out_len: usize) callconv(.c) i32 {
     const result = formatMegabytesToGigabytes(mb, out_buf[0..out_len]) catch return -1;
     return @intCast(result.len);
 }
 
-export fn zig_format_gb_to_mb(gb: f64, out_buf: [*]u8, out_len: usize) callconv(.C) i32 {
+export fn zig_format_gb_to_mb(gb: f64, out_buf: [*]u8, out_len: usize) callconv(.c) i32 {
     const result = formatGigabytesToMegabytes(gb, out_buf[0..out_len]) catch return -1;
     return @intCast(result.len);
 }

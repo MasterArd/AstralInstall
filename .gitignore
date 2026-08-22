@@ -8,3 +8,9 @@ src/Backend/Backend*
 # Enthaelt das GitHub Client Secret - niemals committen
 HANDOFF-Firebase-Auth.md
 auth.json
+
+# Zig-Toolchain, die CMake bei Bedarf selbst herunterlaedt
+tools/
+
+# Von Zig erzeugte statische Bibliothek fuer cgo
+src/Backend/Common/libformat.a*
