@@ -1,3 +1,8 @@
+// this is code for converting data sizes from megabytes to gigabytes and vice versa.
+// it is compiled into a static library and then used by go with it's functions in file: Convert.go
+// there is an issue between using the capital C when using callconv(.C) because in windows or older verisons of zig it is actually not capitalized.
+
+
 const std = @import("std");
 
 pub fn formatMegabytesToGigabytes(megabytes: f64, buf: []u8) ![]const u8 {
@@ -21,7 +26,7 @@ pub fn formatBytes(bytes: u64, buf: []u8) ![]const u8 {
     return std.fmt.bufPrint(buf, "{d:.2} {s}", .{ size, units[unit_idx] });
 }
 
-// --- C Export Wrappers ---
+// --- C Export Wrappers
 
 export fn zig_format_bytes(bytes: u64, out_buf: [*]u8, out_len: usize) callconv(.C) i32 {
     const result = formatBytes(bytes, out_buf[0..out_len]) catch return -1;

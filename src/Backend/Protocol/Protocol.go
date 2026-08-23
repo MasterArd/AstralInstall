@@ -14,6 +14,8 @@ This will talk to C++ front end through stdin-stdout+JSON
 type Request struct {
     Action string `json:"action"`
     Repo   string `json:"repo"`
+    Destination string `json:"destination"`
+    Platform string `json:"platform"`
 }
 
 type Response struct {
@@ -21,6 +23,7 @@ type Response struct {
     Version string `json:"version,omitempty"`
     Error   string `json:"error,omitempty"`
 }
+
 
 func ImportTest() {
     fmt.Println("Protocol was Initialized")
@@ -60,7 +63,7 @@ func FrontendLineReader() {
         case "check_release":
             handleCheckRelease(request)
         case "download_newest":
-            
+            handleDownloadRelease(request)
         default:
             writeResponse(Response{
                 Success: false,
@@ -94,6 +97,26 @@ func handleCheckRelease(request Request) {
     writeResponse(Response{
         Success: true,
         Version: release.Version,
+    })
+}
+
+func handleDownloadRelease(request Request) {
+    
+    if request.Repo == "" {
+        writeResponse(Response{Success: false, Error: "repo field is required"})
+        return
+    }
+
+    err := network.Download(request.Repo, request.Platform , request.Destination)
+    if err != nil {
+        writeResponse(Response{
+            Success: false,
+            Error:   err.Error(),
+        })
+        return
+    }
+    writeResponse(Response{
+        Success: true,
     })
 }
 

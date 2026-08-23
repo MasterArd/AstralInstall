@@ -1,8 +1,8 @@
 /*
     ======================================================================================================
     this is code for a random seed in C that will be returned to Go for debugging and session (re)storing,
-    makes use of CGO to "import it" into Go the "header" is Seed.go
-
+    makes use of CGO to "import it" into Go the "header" is Seed.go.
+    IDE's may report errors regarding line 17 to 23 because they cannot find the header file for the other platform
 
     ======================================================================================================
 */

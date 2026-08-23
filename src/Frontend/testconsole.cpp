@@ -1,6 +1,7 @@
 #include "testconsole.h"
 #include <QVBoxLayout>
 #include <QFontDatabase>
+#include "backendbridge.h"
 
 TestConsole::TestConsole(QWidget *parent)
     : QDialog(parent)
@@ -55,10 +56,13 @@ void TestConsole::processCommand(const QString &cmd) {
         response = "Test 1 result: OK";
         // ADD YOUR BACKEND FUNCTION HERE
     }
+
     else if (cmd.startsWith("test2")) {
         response = "Test 2 result: " + cmd.mid(6);
         // ADD YOUR BACKEND FUNCTION HERE
+        backendBridge.sendRequest(cmd.mid(6));
     }
+
     else if (cmd == "clear") {
         output->clear();
         return;
