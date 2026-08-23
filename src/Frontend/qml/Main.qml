@@ -66,6 +66,42 @@ Window {
 
             onClicked: gameManager.currentPage = 1
         }
+        //gh login
+        Button { 
+            text: "GitHub" 
+            
+            width: 100
+            height: 40
+            
+            hoverEnabled: false
+            focusPolicy: Qt.NoFocus
+            flat: true
+            
+            background: Rectangle {
+                color: "Black" 
+                radius: 20
+            }
+            contentItem: Row {
+                spacing: 6
+                leftPadding: 10
+                Image {
+                    source: "qrc:/assets/symboles/Githublogo.png"
+                    sourceSize.width: 20
+                    sourceSize.height: 20
+                    width: 20
+                    height: 20
+                    fillMode: Image.PreserveAspectFit
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Text {
+                    text: "GitHub"
+                    color: "white"
+                    font.pixelSize: 18
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+            onClicked: {}//make githb login
+        }
 
         Item {
             Layout.fillWidth: true
