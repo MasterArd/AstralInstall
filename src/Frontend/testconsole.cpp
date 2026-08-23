@@ -60,7 +60,7 @@ void TestConsole::processCommand(const QString &cmd) {
     else if (cmd.startsWith("test2")) {
         response = "Test 2 result: " + cmd.mid(6);
         // ADD YOUR BACKEND FUNCTION HERE
-        backendBridge.sendRequest(cmd.mid(6));
+        //backendBridge.sendRequest(cmd.mid(6));
     }
 
     else if (cmd == "clear") {
