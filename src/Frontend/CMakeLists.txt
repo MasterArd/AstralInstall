@@ -50,10 +50,13 @@ set(ZIG_LIBRARY "${BACKEND_DIR}/Common/libformat.a")
 find_program(GO_EXECUTABLE go)
 
 # Zig baut Common/libformat.a. Damit weder Windows noch Linux eine
-# Handinstallation braucht, holen wir das offizielle Release nach tools/,
-# falls zig nicht ohnehin im PATH steht. tools/ liegt neben build/ und
-# ueberlebt damit ein 'make clean'.
-set(ZIG_VERSION "0.16.0")
+# Handinstallation braucht, holen wir das offizielle Release nach tools/.
+# tools/ liegt neben build/ und ueberlebt damit ein 'make clean'.
+#
+# Die Version ist bewusst gepinnt: Common/Convert.zig nutzt callconv(.C),
+# das seit Zig 0.15 callconv(.c) heisst. 0.14.1 ist die letzte Release,
+# die den Code unveraendert uebersetzt.
+set(ZIG_VERSION "0.14.1")
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
     set(ZIG_ARCH "aarch64")
@@ -61,67 +64,73 @@ else()
     set(ZIG_ARCH "x86_64")
 endif()
 
-find_program(ZIG_EXECUTABLE zig)
+# Die gepinnte Toolchain hat immer Vorrang vor einem zig aus dem PATH.
+# Sonst entscheidet die zufaellige Version der jeweiligen Maschine darueber,
+# ob Common/Convert.zig baut - genau das hat Windows und Linux auseinander-
+# laufen lassen.
+if(WIN32)
+    set(ZIG_OS "windows")
+    set(ZIG_ARCHIVE_SUFFIX "zip")
+    set(ZIG_BINARY_NAME "zig.exe")
+else()
+    set(ZIG_OS "linux")
+    set(ZIG_ARCHIVE_SUFFIX "tar.xz")
+    set(ZIG_BINARY_NAME "zig")
+endif()
 
+# sha256 der offiziellen Releases, siehe https://ziglang.org/download/index.json
+if(ZIG_ARCH STREQUAL "x86_64" AND ZIG_OS STREQUAL "windows")
+    set(ZIG_SHA256 "554f5378228923ffd558eac35e21af020c73789d87afeabf4bfd16f2e6feed2c")
+elseif(ZIG_ARCH STREQUAL "aarch64" AND ZIG_OS STREQUAL "windows")
+    set(ZIG_SHA256 "b5aac0ccc40dd91e8311b1f257717d8e3903b5fefb8f659de6d65a840ad1d0e7")
+elseif(ZIG_ARCH STREQUAL "x86_64" AND ZIG_OS STREQUAL "linux")
+    set(ZIG_SHA256 "24aeeec8af16c381934a6cd7d95c807a8cb2cf7df9fa40d359aa884195c4716c")
+elseif(ZIG_ARCH STREQUAL "aarch64" AND ZIG_OS STREQUAL "linux")
+    set(ZIG_SHA256 "f7a654acc967864f7a050ddacfaa778c7504a0eca8d2b678839c21eea47c992b")
+else()
+    set(ZIG_SHA256 "")
+endif()
+
+set(ZIG_DIST "zig-${ZIG_ARCH}-${ZIG_OS}-${ZIG_VERSION}")
+set(ZIG_TOOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../tools")
+set(ZIG_DOWNLOADED "${ZIG_TOOLS_DIR}/${ZIG_DIST}/${ZIG_BINARY_NAME}")
+
+if(NOT EXISTS "${ZIG_DOWNLOADED}" AND ZIG_SHA256)
+    set(ZIG_ARCHIVE "${ZIG_TOOLS_DIR}/${ZIG_DIST}.${ZIG_ARCHIVE_SUFFIX}")
+    message(STATUS "Downloading ${ZIG_DIST}")
+
+    file(DOWNLOAD
+        "https://ziglang.org/download/${ZIG_VERSION}/${ZIG_DIST}.${ZIG_ARCHIVE_SUFFIX}"
+        "${ZIG_ARCHIVE}"
+        EXPECTED_HASH SHA256=${ZIG_SHA256}
+        TLS_VERIFY ON
+        SHOW_PROGRESS
+        STATUS ZIG_DOWNLOAD_STATUS
+    )
+
+    list(GET ZIG_DOWNLOAD_STATUS 0 ZIG_DOWNLOAD_CODE)
+    if(ZIG_DOWNLOAD_CODE EQUAL 0)
+        # Das Archiv enthaelt bereits den Ordner ${ZIG_DIST}.
+        file(ARCHIVE_EXTRACT INPUT "${ZIG_ARCHIVE}" DESTINATION "${ZIG_TOOLS_DIR}")
+        file(REMOVE "${ZIG_ARCHIVE}")
+    else()
+        list(GET ZIG_DOWNLOAD_STATUS 1 ZIG_DOWNLOAD_ERROR)
+        message(WARNING "Downloading Zig failed: ${ZIG_DOWNLOAD_ERROR}")
+        file(REMOVE "${ZIG_ARCHIVE}")
+    endif()
+elseif(NOT ZIG_SHA256)
+    message(WARNING "No pinned Zig build for ${ZIG_ARCH}-${ZIG_OS} - "
+                    "install zig manually or put it in PATH")
+endif()
+
+if(EXISTS "${ZIG_DOWNLOADED}")
+    set(ZIG_EXECUTABLE "${ZIG_DOWNLOADED}" CACHE FILEPATH "zig compiler" FORCE)
+endif()
+
+# Nur falls die gepinnte Toolchain fehlt (Download fehlgeschlagen, exotische
+# Plattform): auf ein zig aus dem PATH zurueckfallen.
 if(NOT ZIG_EXECUTABLE)
-    if(WIN32)
-        set(ZIG_OS "windows")
-        set(ZIG_ARCHIVE_SUFFIX "zip")
-        set(ZIG_BINARY_NAME "zig.exe")
-    else()
-        set(ZIG_OS "linux")
-        set(ZIG_ARCHIVE_SUFFIX "tar.xz")
-        set(ZIG_BINARY_NAME "zig")
-    endif()
-
-    # sha256 der offiziellen Releases, siehe https://ziglang.org/download/index.json
-    if(ZIG_ARCH STREQUAL "x86_64" AND ZIG_OS STREQUAL "windows")
-        set(ZIG_SHA256 "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e")
-    elseif(ZIG_ARCH STREQUAL "aarch64" AND ZIG_OS STREQUAL "windows")
-        set(ZIG_SHA256 "aee38316ee4111717900f45dd3130145c39289e105541d737eb8c5ed653c78ef")
-    elseif(ZIG_ARCH STREQUAL "x86_64" AND ZIG_OS STREQUAL "linux")
-        set(ZIG_SHA256 "70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00")
-    elseif(ZIG_ARCH STREQUAL "aarch64" AND ZIG_OS STREQUAL "linux")
-        set(ZIG_SHA256 "ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17")
-    else()
-        set(ZIG_SHA256 "")
-    endif()
-
-    set(ZIG_DIST "zig-${ZIG_ARCH}-${ZIG_OS}-${ZIG_VERSION}")
-    set(ZIG_TOOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../tools")
-    set(ZIG_DOWNLOADED "${ZIG_TOOLS_DIR}/${ZIG_DIST}/${ZIG_BINARY_NAME}")
-
-    if(NOT EXISTS "${ZIG_DOWNLOADED}" AND ZIG_SHA256)
-        set(ZIG_ARCHIVE "${ZIG_TOOLS_DIR}/${ZIG_DIST}.${ZIG_ARCHIVE_SUFFIX}")
-        message(STATUS "Downloading ${ZIG_DIST}")
-
-        file(DOWNLOAD
-            "https://ziglang.org/download/${ZIG_VERSION}/${ZIG_DIST}.${ZIG_ARCHIVE_SUFFIX}"
-            "${ZIG_ARCHIVE}"
-            EXPECTED_HASH SHA256=${ZIG_SHA256}
-            TLS_VERIFY ON
-            SHOW_PROGRESS
-            STATUS ZIG_DOWNLOAD_STATUS
-        )
-
-        list(GET ZIG_DOWNLOAD_STATUS 0 ZIG_DOWNLOAD_CODE)
-        if(ZIG_DOWNLOAD_CODE EQUAL 0)
-            # Das Archiv enthaelt bereits den Ordner ${ZIG_DIST}.
-            file(ARCHIVE_EXTRACT INPUT "${ZIG_ARCHIVE}" DESTINATION "${ZIG_TOOLS_DIR}")
-            file(REMOVE "${ZIG_ARCHIVE}")
-        else()
-            list(GET ZIG_DOWNLOAD_STATUS 1 ZIG_DOWNLOAD_ERROR)
-            message(WARNING "Downloading Zig failed: ${ZIG_DOWNLOAD_ERROR}")
-            file(REMOVE "${ZIG_ARCHIVE}")
-        endif()
-    elseif(NOT ZIG_SHA256)
-        message(WARNING "No pinned Zig build for ${ZIG_ARCH}-${ZIG_OS} - "
-                        "install zig manually or put it in PATH")
-    endif()
-
-    if(EXISTS "${ZIG_DOWNLOADED}")
-        set(ZIG_EXECUTABLE "${ZIG_DOWNLOADED}" CACHE FILEPATH "zig compiler" FORCE)
-    endif()
+    find_program(ZIG_EXECUTABLE zig)
 endif()
 
 # Common/Seed.go und Common/Convert.go nutzen cgo, das Backend braucht also
