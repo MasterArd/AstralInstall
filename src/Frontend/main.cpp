@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
     GameManager gameManager;
     BackendBridge backend;
     Settings settings;
-    TestConsole testConsole;
+    // Die Konsole schickt ihre Befehle ueber dieselbe Bridge wie die UI.
+    TestConsole testConsole(&backend);
 
 
     QObject::connect(&backend, &BackendBridge::releaseChecked,

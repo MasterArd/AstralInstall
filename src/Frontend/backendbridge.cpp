@@ -11,7 +11,13 @@ namespace {
 // GitHub can hang and the backend has no timeout of its own, so
 // without this the UI would wait forever.
 constexpr int kRequestTimeoutMs = 15000;
+// Ein Download laedt eine ganze Release-Datei, das dauert legitim
+// laenger als eine API-Abfrage.
+constexpr int kDownloadTimeoutMs = 10 * 60 * 1000;
 constexpr int kProcessWaitMs = 3000;
+
+const QString kActionCheckRelease = QStringLiteral("check_release");
+const QString kActionDownloadNewest = QStringLiteral("download_newest");
 }
 
 BackendBridge::BackendBridge(QObject *parent)
@@ -102,10 +108,29 @@ void BackendBridge::checkRelease(const QString &repo)
     }
 
     QJsonObject request;
-    request[QStringLiteral("action")] = QStringLiteral("check_release");
+    request[QStringLiteral("action")] = kActionCheckRelease;
     request[QStringLiteral("repo")] = repo;
 
-    sendRequest(request, PendingRequest{QStringLiteral("check_release"), repo, false});
+    sendRequest(request, PendingRequest{kActionCheckRelease, repo, QString(), false});
+}
+
+void BackendBridge::downloadNewest(const QString &repo,
+                                   const QString &platform,
+                                   const QString &destination)
+{
+    if (repo.trimmed().isEmpty()) {
+        emit requestFailed(repo, tr("No repository given"));
+        return;
+    }
+
+    QJsonObject request;
+    request[QStringLiteral("action")] = kActionDownloadNewest;
+    request[QStringLiteral("repo")] = repo;
+    request[QStringLiteral("platform")] = platform;
+    request[QStringLiteral("destination")] = destination;
+
+    sendRequest(request,
+                PendingRequest{kActionDownloadNewest, repo, destination, false});
 }
 
 void BackendBridge::sendRequest(const QJsonObject &request, const PendingRequest &pending)
@@ -157,8 +182,13 @@ void BackendBridge::handleLine(const QByteArray &line)
     const QJsonDocument doc = QJsonDocument::fromJson(line, &parseError);
 
     if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        emit backendError(tr("Invalid response from backend: %1")
-                              .arg(QString::fromUtf8(line)));
+        // Das Backend schreibt waehrend eines Downloads Fortschritt auf
+        // stdout ("Latest release: ...", "Downloading: ..."), also in
+        // denselben Kanal wie die Antworten. Solche Zeilen sind kein
+        // Protokollfehler - die eigentliche JSON-Antwort kommt danach
+        // noch. Deshalb durchreichen und weiter warten, nicht die
+        // offene Anfrage abraeumen.
+        emit backendMessage(QString::fromUtf8(line));
         return;
     }
 
@@ -189,9 +219,11 @@ void BackendBridge::handleLine(const QByteArray &line)
         return;
     }
 
-    if (pending.action == QStringLiteral("check_release")) {
+    if (pending.action == kActionCheckRelease) {
         emit releaseChecked(pending.repo,
                             obj.value(QStringLiteral("version")).toString());
+    } else if (pending.action == kActionDownloadNewest) {
+        emit downloadFinished(pending.repo, pending.destination);
     }
 }
 
@@ -203,7 +235,13 @@ void BackendBridge::armTimeout()
     }
 
     if (!m_timeoutTimer.isActive())
-        m_timeoutTimer.start(kRequestTimeoutMs);
+        m_timeoutTimer.start(timeoutForAction(m_pending.head().action));
+}
+
+int BackendBridge::timeoutForAction(const QString &action)
+{
+    return action == kActionDownloadNewest ? kDownloadTimeoutMs
+                                           : kRequestTimeoutMs;
 }
 
 void BackendBridge::onTimeout()
@@ -220,7 +258,7 @@ void BackendBridge::onTimeout()
         emit requestFailed(head.repo, tr("Request timed out"));
     }
 
-    m_timeoutTimer.start(kRequestTimeoutMs);
+    m_timeoutTimer.start(timeoutForAction(head.action));
 }
 
 void BackendBridge::onStderr()
@@ -228,8 +266,10 @@ void BackendBridge::onStderr()
     // The backend logs to stderr. Keep it out of the protocol stream,
     // just pass it through.
     const QByteArray err = m_process.readAllStandardError().trimmed();
-    if (!err.isEmpty())
+    if (!err.isEmpty()) {
         qWarning("[Backend] %s", err.constData());
+        emit backendMessage(QString::fromUtf8(err));
+    }
 }
 
 void BackendBridge::onProcessError(QProcess::ProcessError error)

@@ -41,11 +41,24 @@ public slots:
     // Answers with releaseChecked() or requestFailed().
     void checkRelease(const QString &repo);
 
+    // Sends action "download_newest": laedt das neueste Release-Asset
+    // nach destination. platform ist ein Filter auf den Asset-Namen
+    // ("windows", "linux", "darwin", ...), leer nimmt das erste Asset.
+    // destination leer laesst das Backend im eigenen Arbeitsverzeichnis
+    // ablegen.
+    // Answers with downloadFinished() or requestFailed().
+    void downloadNewest(const QString &repo,
+                        const QString &platform = QString(),
+                        const QString &destination = QString());
+
 signals:
     void runningChanged();
 
     // Successful response to checkRelease()
     void releaseChecked(const QString &repo, const QString &version);
+
+    // Successful response to downloadNewest()
+    void downloadFinished(const QString &repo, const QString &destination);
 
     // The backend rejected the request: unknown action, network error,
     // repo not found, timeout, ...
@@ -53,6 +66,10 @@ signals:
 
     // Trouble with the process itself, not with a single request
     void backendError(const QString &message);
+
+    // Alles, was das Backend ausgibt ohne dass es eine Antwort ist:
+    // stderr-Logs und Fortschrittszeilen auf stdout. Rein informativ.
+    void backendMessage(const QString &text);
 
 private slots:
     void onStdout();
@@ -65,6 +82,7 @@ private:
     struct PendingRequest {
         QString action;
         QString repo;
+        QString destination;
         bool timedOut = false;
     };
 
@@ -74,6 +92,7 @@ private:
     void armTimeout();
 
     static QString backendExecutablePath();
+    static int timeoutForAction(const QString &action);
 
     QProcess m_process;
     QByteArray m_buffer;
