@@ -10,7 +10,7 @@ Rectangle {
         width: parent.width
         height: parent.height
         
-        // CONTENT (oben)
+        // CONTENT (top)
         Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
@@ -21,7 +21,7 @@ Rectangle {
             
         }
         
-        // FOOTER (unten)
+        // FOOTER (bottom)
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left

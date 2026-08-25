@@ -12,8 +12,8 @@ class TestConsole : public QDialog {
     Q_OBJECT
 
 public:
-    // Der Bridge-Zeiger darf null sein - dann laufen nur die lokalen
-    // Befehle, die Backend-Befehle melden sich mit einer Fehlerzeile.
+    // The bridge pointer may be null - then only the local commands
+    // run, and the backend commands report back with an error line.
     explicit TestConsole(BackendBridge *bridge = nullptr, QWidget *parent = nullptr);
 
 private slots:
@@ -25,19 +25,19 @@ private:
     void handleDownload(QStringList args);
     void print(const QString &text);
 
-    // Zerlegt eine Eingabezeile in Tokens. Anfuehrungszeichen halten
-    // zusammen, was zusammengehoert: dest="C:\Program Files\Games".
+    // Splits an input line into tokens. Quotes keep together what
+    // belongs together: dest="C:\Program Files\Games".
     static QStringList tokenize(const QString &line);
 
-    // Sucht "name=wert" in den Argumenten und entfernt den Treffer aus
-    // der Liste. Gibt fallback zurueck, wenn nichts passt.
+    // Looks for "name=value" in the arguments and removes the match
+    // from the list. Returns fallback if nothing matches.
     static QString takeOption(QStringList &args, const QString &name,
                               const QString &fallback = QString());
 
-    // "windows", "linux" oder "darwin" - passend zum laufenden System.
+    // "windows", "linux" or "darwin" - matching the running system.
     static QString currentPlatform();
 
-    // Downloads/AstralInstall, falls der Nutzer kein dest= angibt.
+    // Downloads/AstralInstall, if the user does not pass a dest=.
     static QString defaultDestination();
 
     QPlainTextEdit *output;

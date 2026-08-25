@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    // Der native Windows-Style zeichnet seine eigenen Indikatoren und
-    // ignoriert Anpassungen (z.B. in FilterCheckBox.qml). "Basic" ist
-    // voll anpassbar und sieht auf Windows und Linux gleich aus.
+    // The native Windows style draws its own indicators and ignores
+    // customizations (e.g. in FilterCheckBox.qml). "Basic" is fully
+    // customizable and looks the same on Windows and Linux.
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
     QCoreApplication::setOrganizationName(QStringLiteral("AstralInstall"));
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     GameManager gameManager;
     BackendBridge backend;
     Settings settings;
-    // Die Konsole schickt ihre Befehle ueber dieselbe Bridge wie die UI.
+    // The console sends its commands over the same bridge as the UI.
     TestConsole testConsole(&backend);
 
 

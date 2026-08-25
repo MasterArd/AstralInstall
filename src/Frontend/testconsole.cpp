@@ -16,8 +16,8 @@ TestConsole::TestConsole(BackendBridge *bridge, QWidget *parent)
     // Output area
     output = new QPlainTextEdit();
     output->setReadOnly(true);
-    // Nicht "Courier" hart verdrahten - den Namen gibt es auf Linux oft
-    // nicht. Qt liefert hier den Monospace-Font des jeweiligen Systems.
+    // Do not hard-wire "Courier" - that name often does not exist on
+    // Linux. Qt returns the monospace font of the running system here.
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPointSize(10);
     output->setFont(font);
@@ -40,8 +40,8 @@ TestConsole::TestConsole(BackendBridge *bridge, QWidget *parent)
     // Focus on input
     input->setFocus();
 
-    // Das Backend antwortet asynchron. Die Antworten landen hier in der
-    // Konsole, damit man das Ergebnis eines Befehls auch sieht.
+    // The backend answers asynchronously. The responses end up here in
+    // the console so the result of a command is actually visible.
     if (backend) {
         connect(backend, &BackendBridge::releaseChecked, this,
                 [this](const QString &repo, const QString &version) {
@@ -49,12 +49,12 @@ TestConsole::TestConsole(BackendBridge *bridge, QWidget *parent)
                 });
         connect(backend, &BackendBridge::downloadFinished, this,
                 [this](const QString &repo, const QString &destination) {
-                    print(QStringLiteral("[ok] %1 heruntergeladen nach %2")
+                    print(QStringLiteral("[ok] %1 downloaded to %2")
                               .arg(repo, destination));
                 });
         connect(backend, &BackendBridge::requestFailed, this,
                 [this](const QString &repo, const QString &error) {
-                    print(QStringLiteral("[fehler] %1: %2").arg(repo, error));
+                    print(QStringLiteral("[error] %1: %2").arg(repo, error));
                 });
         connect(backend, &BackendBridge::backendError, this,
                 [this](const QString &message) {
@@ -89,7 +89,7 @@ QStringList TestConsole::tokenize(const QString &line) {
     for (const QChar &c : line) {
         if (c == QLatin1Char('"')) {
             inQuotes = !inQuotes;
-            hasToken = true;          // "" ist ein leeres, aber echtes Token
+            hasToken = true;          // "" is an empty but real token
             continue;
         }
         if (c.isSpace() && !inQuotes) {
@@ -145,53 +145,53 @@ void TestConsole::handleCheck(const QStringList &args) {
         return;
     }
     if (!backend) {
-        print(QStringLiteral("Keine Backend-Bridge verbunden.\n"));
+        print(QStringLiteral("No backend bridge connected.\n"));
         return;
     }
 
     const QString repo = args.first();
-    print(QStringLiteral("Frage neueste Version ab: %1 ...").arg(repo));
+    print(QStringLiteral("Checking newest version: %1 ...").arg(repo));
     backend->checkRelease(repo);
 }
 
 void TestConsole::handleDownload(QStringList args) {
     if (args.isEmpty()) {
         print(QStringLiteral(
-            "Usage: download <repo-url> [dest=<pfad>] [platform=<hinweis>]\n"
-            "  repo      GitHub-URL, z.B. https://github.com/user/projekt\n"
-            "  dest      Zielordner (Standard: %1)\n"
-            "  platform  Filter auf den Asset-Namen, z.B. windows/linux/darwin\n"
-            "            (Standard: %2)\n"
-            "Beispiel:\n"
+            "Usage: download <repo-url> [dest=<path>] [platform=<hint>]\n"
+            "  repo      GitHub URL, e.g. https://github.com/user/project\n"
+            "  dest      Target folder (default: %1)\n"
+            "  platform  Filter on the asset name, e.g. windows/linux/darwin\n"
+            "            (default: %2)\n"
+            "Example:\n"
             "  download https://github.com/hannes-swd/code-miner "
             "dest=\"C:\\Games\\code-miner\" platform=windows\n")
                   .arg(defaultDestination(), currentPlatform()));
         return;
     }
     if (!backend) {
-        print(QStringLiteral("Keine Backend-Bridge verbunden.\n"));
+        print(QStringLiteral("No backend bridge connected.\n"));
         return;
     }
 
-    // Erst die benannten Parameter herausziehen, was danach uebrig
-    // bleibt, ist die Repo-URL.
+    // Pull out the named parameters first; whatever is left over is the
+    // repo URL.
     const QString destination = takeOption(args, QStringLiteral("dest"),
                                            defaultDestination());
     const QString platform = takeOption(args, QStringLiteral("platform"),
                                         currentPlatform());
 
     if (args.isEmpty()) {
-        print(QStringLiteral("Fehlt: die Repo-URL.\n"));
+        print(QStringLiteral("Missing: the repo URL.\n"));
         return;
     }
     if (args.size() > 1) {
-        print(QStringLiteral("Unbekannte Parameter: %1\n")
+        print(QStringLiteral("Unknown parameters: %1\n")
                   .arg(args.mid(1).join(QLatin1Char(' '))));
         return;
     }
 
     const QString repo = args.first();
-    print(QStringLiteral("Lade herunter: %1\n  Ziel:     %2\n  Platform: %3")
+    print(QStringLiteral("Downloading: %1\n  Target:   %2\n  Platform: %3")
               .arg(repo, destination, platform));
     backend->downloadNewest(repo, platform, destination);
 }
@@ -207,10 +207,10 @@ void TestConsole::processCommand(const QString &cmd) {
         print(QStringLiteral(
             "Commands:\n"
             "  check <repo-url>\n"
-            "      Neueste Release-Version abfragen.\n"
-            "  download <repo-url> [dest=<pfad>] [platform=<hinweis>]\n"
-            "      Neuestes Release herunterladen. Pfade mit Leerzeichen\n"
-            "      in Anfuehrungszeichen: dest=\"C:\\Program Files\\App\"\n"
+            "      Query the newest release version.\n"
+            "  download <repo-url> [dest=<path>] [platform=<hint>]\n"
+            "      Download the newest release. Quote paths that contain\n"
+            "      spaces: dest=\"C:\\Program Files\\App\"\n"
             "  clear\n"
             "  exit\n"));
         return;

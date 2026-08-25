@@ -11,8 +11,8 @@ namespace {
 // GitHub can hang and the backend has no timeout of its own, so
 // without this the UI would wait forever.
 constexpr int kRequestTimeoutMs = 15000;
-// Ein Download laedt eine ganze Release-Datei, das dauert legitim
-// laenger als eine API-Abfrage.
+// A download fetches a whole release file, which legitimately takes
+// longer than an API query.
 constexpr int kDownloadTimeoutMs = 10 * 60 * 1000;
 constexpr int kProcessWaitMs = 3000;
 
@@ -182,12 +182,12 @@ void BackendBridge::handleLine(const QByteArray &line)
     const QJsonDocument doc = QJsonDocument::fromJson(line, &parseError);
 
     if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
-        // Das Backend schreibt waehrend eines Downloads Fortschritt auf
-        // stdout ("Latest release: ...", "Downloading: ..."), also in
-        // denselben Kanal wie die Antworten. Solche Zeilen sind kein
-        // Protokollfehler - die eigentliche JSON-Antwort kommt danach
-        // noch. Deshalb durchreichen und weiter warten, nicht die
-        // offene Anfrage abraeumen.
+        // While downloading, the backend writes progress to stdout
+        // ("Latest release: ...", "Downloading: ..."), so into the same
+        // channel as the responses. Such lines are not a protocol
+        // error - the actual JSON response still follows. So pass them
+        // through and keep waiting instead of clearing the open
+        // request.
         emit backendMessage(QString::fromUtf8(line));
         return;
     }

@@ -41,11 +41,11 @@ public slots:
     // Answers with releaseChecked() or requestFailed().
     void checkRelease(const QString &repo);
 
-    // Sends action "download_newest": laedt das neueste Release-Asset
-    // nach destination. platform ist ein Filter auf den Asset-Namen
-    // ("windows", "linux", "darwin", ...), leer nimmt das erste Asset.
-    // destination leer laesst das Backend im eigenen Arbeitsverzeichnis
-    // ablegen.
+    // Sends action "download_newest": downloads the newest release
+    // asset into destination. platform is a filter on the asset name
+    // ("windows", "linux", "darwin", ...); empty takes the first asset.
+    // An empty destination lets the backend store it in its own working
+    // directory.
     // Answers with downloadFinished() or requestFailed().
     void downloadNewest(const QString &repo,
                         const QString &platform = QString(),
@@ -67,8 +67,8 @@ signals:
     // Trouble with the process itself, not with a single request
     void backendError(const QString &message);
 
-    // Alles, was das Backend ausgibt ohne dass es eine Antwort ist:
-    // stderr-Logs und Fortschrittszeilen auf stdout. Rein informativ.
+    // Anything the backend prints that is not a response: stderr logs
+    // and progress lines on stdout. Purely informational.
     void backendMessage(const QString &text);
 
 private slots:

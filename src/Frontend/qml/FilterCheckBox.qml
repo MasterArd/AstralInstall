@@ -2,14 +2,14 @@ import QtQuick
 import QtQuick.Controls
 
 /*
-    Ein Filtereintrag in der Sidebar: Checkbox + Label.
-    Indikator und Haken sind gezeichnet, damit kein PNG noetig ist.
+    A filter entry in the sidebar: checkbox + label.
+    Indicator and check mark are drawn so that no PNG is needed.
 */
 CheckBox {
     id: control
 
-    // Filter starten alle aktiv; einzelne Eintraege koennen mit
-    // "checked: false" davon abweichen.
+    // Filters all start active; individual entries can opt out with
+    // "checked: false".
     checked: true
 
     padding: 0
@@ -17,7 +17,7 @@ CheckBox {
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
-    // Kein Hover-/Klick-Highlight vom Controls-Style, nur unser Indikator.
+    // No hover/click highlight from the Controls style, only our indicator.
     background: null
 
     indicator: Rectangle {
@@ -31,7 +31,7 @@ CheckBox {
         border.width: 2
         border.color: control.checked || control.hovered ? "white" : "#a0a0a0"
 
-        // Haken: zwei gedrehte Balken statt eines Bildes.
+        // Check mark: two rotated bars instead of an image.
         Item {
             anchors.centerIn: parent
             width: 12
