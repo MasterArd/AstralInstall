@@ -3,6 +3,7 @@
     <qresource>
         <file>qml/Main.qml</file>
         <file>qml/Library.qml</file>
+        <file>qml/GameCard.qml</file>
         <file>qml/MyGamesPage.qml</file>
         <file>qml/Colors.qml</file>
         <file>qml/FilterCheckBox.qml</file>

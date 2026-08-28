@@ -146,22 +146,37 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: 30
+            model: gameLibrary
 
             property int columns: Math.max(1, Math.floor(width / 200))
-            cellWidth: width / columns
-            cellHeight: cellWidth * 1.4
+            cellWidth: (width / columns) * 1.5
+            cellHeight: (width / columns) * 1.5
 
-            delegate: Item {
+            delegate: GameCard {
+                // "model" carries all roles GameLibrary::roleNames() lists.
+                required property var model
+
                 width: GridView.view.cellWidth
                 height: GridView.view.cellHeight
 
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    radius: 4
-                    color: "red"
-                }
+                name: model.name
+                description: model.description
+                developer: model.developer
+                capsule: model.capsule
+                banner: model.banner
+                platforms: model.platforms
+                genres: model.genres
+                version: model.version
+            }
+
+            // Nothing to show: usually a missing or empty games.json.
+            // The reason is on stderr, see the [GameLibrary] warnings.
+            Text {
+                anchors.centerIn: parent
+                visible: gameLibrary.count === 0
+                text: "No games"
+                color: "white"
+                font.pixelSize: 18
             }
         }
     }

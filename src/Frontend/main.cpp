@@ -4,6 +4,7 @@
 #include <QQmlEngine>
 #include <QQuickStyle>
 #include "gamemanager.h"
+#include "gamelibrary.h"
 #include "backendbridge.h"
 #include "settings.h"
 #include "testconsole.h"
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral("AstralInstall"));
 
     GameManager gameManager;
+    GameLibrary gameLibrary;
     BackendBridge backend;
     Settings settings;
     // The console sends its commands over the same bridge as the UI.
@@ -46,8 +48,14 @@ int main(int argc, char *argv[])
     // Fork the backend as a child process before the UI comes up.
     backend.start();
 
+    // TEMPORARY: the library is mocked from a JSON file next to the
+    // executable. Replace this with the backend's "list_games" answer
+    // once it exists - gameLibrary.setGames() takes it as is.
+    gameLibrary.loadFromFile(GameLibrary::defaultFilePath());
+
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("gameManager", &gameManager);
+    engine.rootContext()->setContextProperty("gameLibrary", &gameLibrary);
     engine.rootContext()->setContextProperty("backend", &backend);
     engine.rootContext()->setContextProperty("testConsole", &testConsole);
 

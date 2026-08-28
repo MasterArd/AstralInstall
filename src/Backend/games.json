@@ -1,0 +1,12 @@
+[
+  {
+    "Game_name": "Test_Name",
+    "description": "Ein kleines Mining-Game.",
+    "developer": "Hannes-swd",
+    "capsule": "https://raw.githubusercontent.com/Hannes-swd/code-miner/master/AstralInstall/Library%20Capsule.png",
+    "banner":  "https://raw.githubusercontent.com/Hannes-swd/code-miner/master/AstralInstall/Banner.png",
+    "platforms": ["windows", "linux"],
+    "genres": ["Simulation"],
+    "Game_version": 1.0
+  }
+]

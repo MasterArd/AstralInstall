@@ -49,6 +49,16 @@ set(ZIG_LIBRARY "${BACKEND_DIR}/Common/libformat.a")
 
 find_program(GO_EXECUTABLE go)
 
+# TEMPORARY: the mocked library data. GameLibrary reads it from next to the
+# executable, so keep the copy in step with the source file on every build.
+# Delete this block once the games come from the backend.
+add_custom_command(TARGET MyAppFrontend POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${BACKEND_DIR}/games.json"
+            "$<TARGET_FILE_DIR:MyAppFrontend>/games.json"
+    COMMENT "Copying games.json"
+)
+
 # Zig baut Common/libformat.a. Damit weder Windows noch Linux eine
 # Handinstallation braucht, holen wir das offizielle Release nach tools/.
 # tools/ liegt neben build/ und ueberlebt damit ein 'make clean'.
