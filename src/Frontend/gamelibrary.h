@@ -29,7 +29,6 @@ public:
         NameRole = Qt::UserRole + 1,
         DescriptionRole,
         DeveloperRole,
-        CapsuleRole,
         BannerRole,
         PlatformsRole,
         GenresRole,
@@ -67,7 +66,6 @@ private:
         QString name;
         QString description;
         QString developer;
-        QString capsule;
         QString banner;
         QStringList platforms;
         QStringList genres;

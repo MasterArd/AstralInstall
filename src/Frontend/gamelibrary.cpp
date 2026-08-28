@@ -16,7 +16,6 @@ namespace {
 constexpr auto KeyName = "Game_name";
 constexpr auto KeyDescription = "description";
 constexpr auto KeyDeveloper = "developer";
-constexpr auto KeyCapsule = "capsule";
 constexpr auto KeyBanner = "banner";
 constexpr auto KeyPlatforms = "platforms";
 constexpr auto KeyGenres = "genres";
@@ -79,7 +78,6 @@ QVariant GameLibrary::data(const QModelIndex &index, int role) const
     case NameRole:        return game.name;
     case DescriptionRole: return game.description;
     case DeveloperRole:   return game.developer;
-    case CapsuleRole:     return game.capsule;
     case BannerRole:      return game.banner;
     case PlatformsRole:   return game.platforms;
     case GenresRole:      return game.genres;
@@ -94,7 +92,6 @@ QHash<int, QByteArray> GameLibrary::roleNames() const
         {NameRole,        "name"},
         {DescriptionRole, "description"},
         {DeveloperRole,   "developer"},
-        {CapsuleRole,     "capsule"},
         {BannerRole,      "banner"},
         {PlatformsRole,   "platforms"},
         {GenresRole,      "genres"},
@@ -119,7 +116,6 @@ void GameLibrary::setGames(const QJsonArray &games)
         game.name = stringField(object, KeyName);
         game.description = stringField(object, KeyDescription);
         game.developer = stringField(object, KeyDeveloper);
-        game.capsule = stringField(object, KeyCapsule);
         game.banner = stringField(object, KeyBanner);
         game.platforms = stringListField(object, KeyPlatforms);
         game.genres = stringListField(object, KeyGenres);

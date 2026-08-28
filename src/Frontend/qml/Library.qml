@@ -162,7 +162,6 @@ Rectangle {
                 name: model.name
                 description: model.description
                 developer: model.developer
-                capsule: model.capsule
                 banner: model.banner
                 platforms: model.platforms
                 genres: model.genres

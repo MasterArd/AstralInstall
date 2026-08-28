@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 
 /*
  * One tile in the library grid. Library.qml fills the properties below
@@ -11,7 +12,6 @@ Item {
     property string name: ""
     property string description: ""
     property string developer: ""
-    property string capsule: ""
     property string banner: ""
     property var platforms: []
     property var genres: []
@@ -30,6 +30,11 @@ Item {
             anchors.top: parent.top
             height: parent.height / 3
             color: "red"
+            Image {
+                height: parent.height
+                width: parent.width
+                source: card.banner
+            }
         }
 
         // Bottom two thirds
@@ -38,7 +43,18 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             height: parent.height * 2 / 3
-            color: "blue"
+            color: "black"
+
+            //name + version
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 8
+                Text { color: "white"; text: card.name;  font.pixelSize: 14 }
+                Item { Layout.fillWidth: true }//placeholder
+                Text { color: "white"; text: "v" + card.version;  font.pixelSize: 14 }
+            }
         }
     }
 }
