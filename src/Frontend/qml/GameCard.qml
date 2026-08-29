@@ -39,6 +39,7 @@ Item {
 
         // Bottom two thirds
         Rectangle {
+            id: infoArea
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -47,14 +48,79 @@ Item {
 
             //name + version
             RowLayout {
+                id: titleRow
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 8
-                Text { color: "white"; text: card.name;  font.pixelSize: 14 }
+
+                //game name
+                Rectangle {
+                    // Box waechst mit dem Text mit -> kein Leerraum links
+                    width: nameText.implicitWidth
+                    height: 25
+                    color: "transparent"
+                    //border.color: "white"
+                    //border.width: 1
+
+                    Text {
+                        id: nameText
+                        anchors.centerIn: parent
+                        color: "white"
+                        text: card.name
+                        font.pixelSize: 14
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
                 Item { Layout.fillWidth: true }//placeholder
-                Text { color: "white"; text: "v" + card.version;  font.pixelSize: 14 }
+                //game version
+                Rectangle {
+                    width: 50
+                    height: 25
+                    color: "black"
+                    border.color: "white"
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        width: parent.width - 8
+                        color: "white"
+                        text: "v" + card.version
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                }
+            }//name + version finish
+
+            //dev name
+            Row {
+                anchors.left: parent.left
+                anchors.top: titleRow.bottom
+                anchors.margins: 8
+                spacing: 0
+
+                Text {
+                    id: byLabel
+                    color: "white"
+                    text: "by "
+                    font.pixelSize: 12
+                }
+
+                Text {
+                    width: Math.min(implicitWidth, infoArea.width - 16 - byLabel.width)
+                    color: hoverHandler.hovered ? "green" : "white"
+                    text: "@" + card.developer
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+
+                    HoverHandler {
+                        id: hoverHandler
+                    }
+                }
             }
+
         }
     }
 }
