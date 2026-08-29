@@ -23,6 +23,17 @@ add_executable(MyAppFrontend
     resources.qrc
 )
 
+# 'vcpkg integrate install' haengt sich per vcpkg.user.targets in JEDES
+# MSBuild-Projekt und kopiert nach dem Linken die Qt-DLLs aus C:/vcpkg ins
+# Ausgabeverzeichnis - dort liegt Qt 6.11.0, gebaut wird aber gegen 6.11.1.
+# Die Plugins bleiben 6.11.1, die DLLs werden 6.11.0, und die App stirbt beim
+# Start mit "Could not load the Qt platform plugin windows". windeployqt
+# laeuft vorher, kann also nichts retten. Darum vcpkg fuer dieses Projekt aus.
+set_target_properties(MyAppFrontend PROPERTIES
+    VS_GLOBAL_VcpkgEnabled false
+    VS_GLOBAL_VcpkgApplocalDeps false
+)
+
 target_link_libraries(MyAppFrontend
     Qt6::Core
     Qt6::Gui
