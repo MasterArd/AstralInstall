@@ -148,7 +148,7 @@ Rectangle {
             clip: true
             model: gameLibrary
 
-            property int columns: Math.max(1, Math.round(width / 300))
+            property int columns: 3
             cellWidth: width / columns
             cellHeight: cellWidth
 

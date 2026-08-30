@@ -20,7 +20,7 @@ Item {
     property var genres: []
     property string version: ""
 
-    readonly property real s: Math.max(0.7, Math.min(1.8, card.width / 300))
+    readonly property real s: Math.max(0.7, Math.min(2.5, card.width / 300))
 
     // Green theme palette - single place to retune the whole card.
     // Badges and chips share one look: panelColor filling, lineColor frame,
