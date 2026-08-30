@@ -148,9 +148,9 @@ Rectangle {
             clip: true
             model: gameLibrary
 
-            property int columns: Math.max(1, Math.floor(width / 200))
-            cellWidth: (width / columns) * 1.5
-            cellHeight: (width / columns) * 1.5
+            property int columns: Math.max(1, Math.round(width / 300))
+            cellWidth: width / columns
+            cellHeight: cellWidth
 
             delegate: GameCard {
                 // "model" carries all roles GameLibrary::roleNames() lists.

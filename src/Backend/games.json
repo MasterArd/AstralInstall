@@ -1,7 +1,7 @@
 [
   {
     "Game_name": "Test_Name",
-    "description": "Ein kleines Mining-Game.",
+    "description": "Example Game description",
     "developer": "Hannes-swd",
     "banner":  "https://github.com/Hannes-swd/Astrallinstall_Template/raw/main/AstralInstall/Banner.png",
     "platforms": ["windows", "linux"],

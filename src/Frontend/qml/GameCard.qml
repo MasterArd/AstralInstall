@@ -20,6 +20,8 @@ Item {
     property var genres: []
     property string version: ""
 
+    readonly property real s: Math.max(0.7, Math.min(1.8, card.width / 300))
+
     // Green theme palette - single place to retune the whole card.
     // Badges and chips share one look: panelColor filling, lineColor frame,
     // accentColor lettering.
@@ -34,10 +36,10 @@ Item {
     Rectangle {
         id: frame
         anchors.fill: parent
-        anchors.margins: 8
+        anchors.margins: Math.round(8 * card.s)
         color: card.bgColor
         border.color: card.borderColor
-        border.width: 1
+        border.width: Math.max(1, Math.round(card.s))
 
         Behavior on border.color { ColorAnimation { duration: 120 } }
 
@@ -48,7 +50,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 1
+            anchors.margins: frame.border.width
             height: frame.height * 0.42
             clip: true
 
@@ -90,7 +92,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                height: 40
+                height: Math.round(40 * card.s)
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "transparent" }
                     GradientStop { position: 1.0; color: card.bgColor }
@@ -105,29 +107,29 @@ Item {
             anchors.right: parent.right
             anchors.top: bannerBox.bottom
             anchors.bottom: parent.bottom
-            anchors.leftMargin: 14
-            anchors.rightMargin: 14
-            anchors.topMargin: 4
-            anchors.bottomMargin: 14
-            spacing: 6
+            anchors.leftMargin: Math.round(14 * card.s)
+            anchors.rightMargin: Math.round(14 * card.s)
+            anchors.topMargin: Math.round(4 * card.s)
+            anchors.bottomMargin: Math.round(14 * card.s)
+            spacing: Math.round(6 * card.s)
 
             // Name + version badge
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Math.round(8 * card.s)
 
                 Text {
                     Layout.fillWidth: true
                     color: card.textColor
                     text: card.name
-                    font.pixelSize: 19
+                    font.pixelSize: Math.round(19 * card.s)
                     font.bold: true
                     elide: Text.ElideRight
                 }
 
                 Rectangle {
-                    Layout.preferredWidth: versionText.implicitWidth + 16
-                    Layout.preferredHeight: 24
+                    Layout.preferredWidth: versionText.implicitWidth + Math.round(16 * card.s)
+                    Layout.preferredHeight: Math.round(24 * card.s)
                     color: card.panelColor
                     border.color: card.lineColor
                     border.width: 1
@@ -137,7 +139,7 @@ Item {
                         anchors.centerIn: parent
                         color: card.accentColor
                         text: "v" + card.version
-                        font.pixelSize: 12
+                        font.pixelSize: Math.round(12 * card.s)
                         font.bold: true
                     }
                 }
@@ -152,7 +154,7 @@ Item {
                     id: byLabel
                     color: card.mutedColor
                     text: "by "
-                    font.pixelSize: 12
+                    font.pixelSize: Math.round(12 * card.s)
                 }
 
                 Text {
@@ -160,7 +162,7 @@ Item {
                     width: Math.min(implicitWidth, infoArea.width - byLabel.width - genreText.width)
                     color: devHover.hovered ? card.textColor : card.accentColor
                     text: "@" + card.developer
-                    font.pixelSize: 12
+                    font.pixelSize: Math.round(12 * card.s)
                     elide: Text.ElideRight
 
                     HoverHandler { id: devHover }
@@ -171,7 +173,7 @@ Item {
                     color: card.mutedColor
                     visible: card.genres.length > 0
                     text: " \u00B7 " + card.genres.join(", ")
-                    font.pixelSize: 12
+                    font.pixelSize: Math.round(12 * card.s)
                 }
             }
 
@@ -179,10 +181,10 @@ Item {
             Text {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.topMargin: 4
+                Layout.topMargin: Math.round(4 * card.s)
                 color: card.mutedColor
                 text: card.description
-                font.pixelSize: 13
+                font.pixelSize: Math.round(13 * card.s)
                 lineHeight: 1.25
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
@@ -192,7 +194,7 @@ Item {
             // Platform chips
             Flow {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Math.round(6 * card.s)
 
                 Repeater {
                     model: card.platforms
@@ -201,8 +203,8 @@ Item {
                         id: platformChip
                         required property string modelData
 
-                        width: platformText.implicitWidth + 18
-                        height: 24
+                        width: platformText.implicitWidth + Math.round(18 * card.s)
+                        height: Math.round(24 * card.s)
                         color: card.panelColor
                         border.color: card.lineColor
                         border.width: 1
@@ -212,7 +214,7 @@ Item {
                             anchors.centerIn: parent
                             color: card.accentColor
                             text: platformChip.modelData
-                            font.pixelSize: 12
+                            font.pixelSize: Math.round(12 * card.s)
                         }
                     }
                 }
