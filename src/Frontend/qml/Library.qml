@@ -162,7 +162,8 @@ Rectangle {
                 description: model.description
                 developer: model.developer
                 banner: model.banner
-                platforms: model.platforms
+                platformWindows: model.platformWindows
+                platformLinux: model.platformLinux
                 genres: model.genres
                 version: model.version
             }

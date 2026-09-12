@@ -16,7 +16,8 @@ Item {
     property string description: ""
     property string developer: ""
     property string banner: ""
-    property var platforms: []
+    property bool platformWindows: false
+    property bool platformLinux: false
     property var genres: []
     property string version: ""
 
@@ -88,6 +89,7 @@ Item {
             }
 
             // Fade the banner into the card body
+            /* I)M NOT SHURE
             Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -97,7 +99,7 @@ Item {
                     GradientStop { position: 0.0; color: "transparent" }
                     GradientStop { position: 1.0; color: card.bgColor }
                 }
-            }
+            }*/
         }
 
         // Card body
@@ -196,26 +198,37 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(6 * card.s)
 
-                Repeater {
-                    model: card.platforms
+                Rectangle {
+                    visible: card.platformWindows
+                    width: windowsText.implicitWidth + Math.round(18 * card.s)
+                    height: Math.round(24 * card.s)
+                    color: card.panelColor
+                    border.color: card.lineColor
+                    border.width: 1
 
-                    Rectangle {
-                        id: platformChip
-                        required property string modelData
+                    Text {
+                        id: windowsText
+                        anchors.centerIn: parent
+                        color: card.accentColor
+                        text: "windows"
+                        font.pixelSize: Math.round(12 * card.s)
+                    }
+                }
 
-                        width: platformText.implicitWidth + Math.round(18 * card.s)
-                        height: Math.round(24 * card.s)
-                        color: card.panelColor
-                        border.color: card.lineColor
-                        border.width: 1
+                Rectangle {
+                    visible: card.platformLinux
+                    width: linuxText.implicitWidth + Math.round(18 * card.s)
+                    height: Math.round(24 * card.s)
+                    color: card.panelColor
+                    border.color: card.lineColor
+                    border.width: 1
 
-                        Text {
-                            id: platformText
-                            anchors.centerIn: parent
-                            color: card.accentColor
-                            text: platformChip.modelData
-                            font.pixelSize: Math.round(12 * card.s)
-                        }
+                    Text {
+                        id: linuxText
+                        anchors.centerIn: parent
+                        color: card.accentColor
+                        text: "linux"
+                        font.pixelSize: Math.round(12 * card.s)
                     }
                 }
             }

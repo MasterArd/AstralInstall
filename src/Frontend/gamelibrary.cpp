@@ -17,7 +17,9 @@ constexpr auto KeyName = "Game_name";
 constexpr auto KeyDescription = "description";
 constexpr auto KeyDeveloper = "developer";
 constexpr auto KeyBanner = "banner";
-constexpr auto KeyPlatforms = "platforms";
+//constexpr auto KeyPlatforms = "platforms";
+constexpr auto keyplatform_windows = "platform_windows";
+constexpr auto keyplatform_linux = "platform_linux";
 constexpr auto KeyGenres = "genres";
 constexpr auto KeyVersion = "Game_version";
 
@@ -40,6 +42,11 @@ QString stringField(const QJsonObject &game, const char *key)
         return text;
     }
     return QString();
+}
+
+bool boolField(const QJsonObject &game, const char *key)
+{
+    return game.value(QLatin1String(key)).toBool();
 }
 
 QStringList stringListField(const QJsonObject &game, const char *key)
@@ -79,7 +86,9 @@ QVariant GameLibrary::data(const QModelIndex &index, int role) const
     case DescriptionRole: return game.description;
     case DeveloperRole:   return game.developer;
     case BannerRole:      return game.banner;
-    case PlatformsRole:   return game.platforms;
+    //case PlatformsRole:   return game.platforms;
+    case PlatformWindowsRole: return game.platformWindows;
+    case PlatformLinuxRole:   return game.platformLinux;
     case GenresRole:      return game.genres;
     case VersionRole:     return game.version;
     default:              return QVariant();
@@ -93,7 +102,9 @@ QHash<int, QByteArray> GameLibrary::roleNames() const
         {DescriptionRole, "description"},
         {DeveloperRole,   "developer"},
         {BannerRole,      "banner"},
-        {PlatformsRole,   "platforms"},
+        //{PlatformsRole,   "platforms"},
+        {PlatformWindowsRole, "platformWindows"},
+        {PlatformLinuxRole,   "platformLinux"},
         {GenresRole,      "genres"},
         {VersionRole,     "version"},
     };
@@ -117,7 +128,9 @@ void GameLibrary::setGames(const QJsonArray &games)
         game.description = stringField(object, KeyDescription);
         game.developer = stringField(object, KeyDeveloper);
         game.banner = stringField(object, KeyBanner);
-        game.platforms = stringListField(object, KeyPlatforms);
+        //game.platforms = stringListField(object, KeyPlatforms);
+        game.platformWindows = boolField(object, keyplatform_windows);
+        game.platformLinux = boolField(object, keyplatform_linux);
         game.genres = stringListField(object, KeyGenres);
         game.version = stringField(object, KeyVersion);
 

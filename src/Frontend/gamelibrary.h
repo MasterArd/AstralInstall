@@ -30,7 +30,9 @@ public:
         DescriptionRole,
         DeveloperRole,
         BannerRole,
-        PlatformsRole,
+        //PlatformsRole,
+        PlatformWindowsRole,
+        PlatformLinuxRole,
         GenresRole,
         VersionRole,
     };
@@ -67,7 +69,9 @@ private:
         QString description;
         QString developer;
         QString banner;
-        QStringList platforms;
+        //QStringList platforms;
+        bool platformWindows = false;
+        bool platformLinux = false;
         QStringList genres;
         QString version;
     };
