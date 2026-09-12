@@ -22,14 +22,15 @@ CheckBox {
 
     indicator: Rectangle {
         id: box
-        implicitWidth: 18
-        implicitHeight: 18
+        implicitWidth: 16
+        implicitHeight: 16
         x: control.leftPadding
         anchors.verticalCenter: parent.verticalCenter
-        radius: 3
-        color: control.checked ? Qt.lighter(Colors.color1, 1.6) : "transparent"
-        border.width: 2
-        border.color: control.checked || control.hovered ? "white" : "#a0a0a0"
+        color: control.checked ? Colors.panelColor : "transparent"
+        border.width: 1
+        border.color: control.checked || control.hovered ? Colors.accentColor : Colors.lineColor
+
+        Behavior on border.color { ColorAnimation { duration: 120 } }
 
         // Check mark: two rotated bars instead of an image.
         Item {
@@ -41,16 +42,14 @@ CheckBox {
             Rectangle {
                 x: 1; y: 7.5
                 width: 5; height: 2
-                radius: 1
-                color: "white"
+                color: Colors.accentColor
                 rotation: 45
                 transformOrigin: Item.Center
             }
             Rectangle {
                 x: 3.25; y: 5.5
                 width: 9.5; height: 2
-                radius: 1
-                color: "white"
+                color: Colors.accentColor
                 rotation: -49
                 transformOrigin: Item.Center
             }
@@ -60,8 +59,11 @@ CheckBox {
     contentItem: Text {
         leftPadding: control.indicator.width + control.spacing
         text: control.text
-        color: "white"
-        font.pointSize: 15
+        color: control.hovered ? Colors.textColor
+             : control.checked ? Colors.textColor : Colors.mutedColor
+        font.pixelSize: 13
         verticalAlignment: Text.AlignVCenter
+
+        Behavior on color { ColorAnimation { duration: 120 } }
     }
 }

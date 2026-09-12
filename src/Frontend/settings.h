@@ -7,8 +7,7 @@
 
 /*
  * Frontend-only user preferences, exposed to QML as the singleton
- * "Settings" (see main.cpp). Colors.qml derives the whole palette
- * from primaryColor, so writing to it repaints the UI live.
+ * 
  *
  * Anything the Go backend also needs belongs in the IPC in
  * BackendBridge, not in here.

@@ -203,8 +203,8 @@ Item {
                     width: windowsText.implicitWidth + Math.round(18 * card.s)
                     height: Math.round(24 * card.s)
                     color: card.panelColor
-                    border.color: card.lineColor
-                    border.width: 1
+                    //border.color: card.lineColor
+                    //border.width: 1
 
                     Text {
                         id: windowsText
@@ -220,8 +220,8 @@ Item {
                     width: linuxText.implicitWidth + Math.round(18 * card.s)
                     height: Math.round(24 * card.s)
                     color: card.panelColor
-                    border.color: card.lineColor
-                    border.width: 1
+                    //border.color: card.lineColor
+                    //border.width: 1
 
                     Text {
                         id: linuxText

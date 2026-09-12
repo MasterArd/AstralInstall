@@ -10,148 +10,208 @@ Window {
     height: 600
     visible: true
     title: "Astral"
-    color: Colors.color3
+    color: Colors.bgColor
 
-    RowLayout {
+    // Top bar
+    Rectangle {
         id: navBar
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 40
-        spacing: 10
+        height: 44
+        color: Colors.panelColor
 
-        Button {
-            text: "library" 
-            width: 100
-            height: 40
-            
-            hoverEnabled: false
-            focusPolicy: Qt.NoFocus
-            flat: true
-
-            background: Rectangle {
-                color: "transparent" 
-            }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 20
-            }
-
-            onClicked: gameManager.currentPage = 0
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: Colors.lineColor
         }
-        Button { 
-            text: "My games" 
-            
-            width: 100
-            height: 40
-            
-            hoverEnabled: false
-            focusPolicy: Qt.NoFocus
-            flat: true
-            
-            background: Rectangle {
-                color: "transparent" 
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 14
+            anchors.rightMargin: 14
+            spacing: 10
+
+            Button {
+                id: libraryButton
+                text: "library"
+
+                Layout.preferredWidth: 100
+                Layout.fillHeight: true
+
+                hoverEnabled: true
+                focusPolicy: Qt.NoFocus
+                flat: true
+
+                background: Rectangle {
+                    color: "transparent"
+
+                    // Active page marker
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 2
+                        color: Colors.accentColor
+                        visible: gameManager.currentPage === 0
+                    }
+                }
+                contentItem: Text {
+                    text: libraryButton.text
+                    color: gameManager.currentPage === 0
+                           ? Colors.textColor
+                           : libraryButton.hovered ? Colors.accentColor : Colors.mutedColor
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 15
+                    font.bold: gameManager.currentPage === 0
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                }
+
+                onClicked: gameManager.currentPage = 0
             }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 20
+            Button {
+                id: myGamesButton
+                text: "My games"
+
+                Layout.preferredWidth: 100
+                Layout.fillHeight: true
+
+                hoverEnabled: true
+                focusPolicy: Qt.NoFocus
+                flat: true
+
+                background: Rectangle {
+                    color: "transparent"
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 2
+                        color: Colors.accentColor
+                        visible: gameManager.currentPage === 1
+                    }
+                }
+                contentItem: Text {
+                    text: myGamesButton.text
+                    color: gameManager.currentPage === 1
+                           ? Colors.textColor
+                           : myGamesButton.hovered ? Colors.accentColor : Colors.mutedColor
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 15
+                    font.bold: gameManager.currentPage === 1
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                }
+
+                onClicked: gameManager.currentPage = 1
+            }
+            //gh login
+            Button {
+                id: githubButton
+                text: "GitHub"
+
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: 26
+                Layout.alignment: Qt.AlignVCenter
+
+                hoverEnabled: true
+                focusPolicy: Qt.NoFocus
+                flat: true
+
+                background: Rectangle {
+                    color: Colors.bgColor
+                    border.color: githubButton.hovered ? Colors.accentColor : Colors.lineColor
+                    border.width: 1
+
+                    Behavior on border.color { ColorAnimation { duration: 120 } }
+                }
+                contentItem: Row {
+                    spacing: 6
+                    leftPadding: 10
+                    Image {
+                        source: "qrc:/assets/symboles/Githublogo.png"
+                        sourceSize.width: 14
+                        sourceSize.height: 14
+                        width: 14
+                        height: 14
+                        fillMode: Image.PreserveAspectFit
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Text {
+                        text: "GitHub"
+                        color: Colors.accentColor
+                        font.pixelSize: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+                onClicked: {}//make githb login
             }
 
-            onClicked: gameManager.currentPage = 1
-        }
-        //gh login
-        Button { 
-            text: "GitHub" 
-            
-            width: 100
-            height: 40
-            
-            hoverEnabled: false
-            focusPolicy: Qt.NoFocus
-            flat: true
-            
-            background: Rectangle {
-                color: "Black" 
-                radius: 20
+            Item {
+                Layout.fillWidth: true
             }
-            contentItem: Row {
-                spacing: 6
+
+            TextField {
+                id: searchField
+                Layout.preferredWidth: 200
+                Layout.preferredHeight: 26
+                Layout.alignment: Qt.AlignVCenter
+                color: Colors.textColor
+                placeholderText: "Search..."
+                placeholderTextColor: Colors.mutedColor
+                font.pixelSize: 12
                 leftPadding: 10
+                rightPadding: 10
+
+                background: Rectangle {
+                    color: Colors.bgColor
+                    border.color: searchField.activeFocus ? Colors.accentColor : Colors.lineColor
+                    border.width: 1
+
+                    Behavior on border.color { ColorAnimation { duration: 120 } }
+                }
+            }
+            Item {
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 20
+                Layout.alignment: Qt.AlignVCenter
+
                 Image {
-                    source: "qrc:/assets/symboles/Githublogo.png"
-                    sourceSize.width: 20
+                    id: dotsMask
+                    anchors.fill: parent
+                    source: "qrc:/assets/symboles/dots.png"
                     sourceSize.height: 20
-                    width: 20
-                    height: 20
                     fillMode: Image.PreserveAspectFit
-                    anchors.verticalCenter: parent.verticalCenter
+                    visible: false
                 }
-                Text {
-                    text: "GitHub"
-                    color: "white"
-                    font.pixelSize: 18
-                    anchors.verticalCenter: parent.verticalCenter
+                Rectangle {
+                    anchors.fill: parent
+                    color: dotsArea.containsMouse ? Colors.accentColor : Colors.mutedColor
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: dotsMask
+                    }
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
                 }
-            }
-            onClicked: {}//make githb login
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        TextField {
-            id: searchField
-            Layout.preferredWidth: 200
-            Layout.preferredHeight: 40
-            color: Colors.color3
-            placeholderText: "Search..."
-
-            background: Rectangle {
-                radius: 5 
-                color: "white"
-                border.color: "#005a05"
-                border.width: 1
-            }
-        }
-        Item {
-            Layout.preferredWidth: 24
-            Layout.preferredHeight: 24
-            Layout.alignment: Qt.AlignVCenter
-            Layout.rightMargin: 10
-
-            Image {
-                id: dotsMask
-                anchors.fill: parent
-                source: "qrc:/assets/symboles/dots.png"
-                sourceSize.height: 24
-                fillMode: Image.PreserveAspectFit
-                visible: false
-            }
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    maskEnabled: true
-                    maskSource: dotsMask
+                MouseArea {
+                    id: dotsArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: testConsole.show()
                 }
-            }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: testConsole.show()
             }
         }
     }
-    
+
     StackLayout {
         anchors.top: navBar.bottom
         anchors.left: parent.left

@@ -4,49 +4,61 @@ import QtQuick.Controls
 import QtQuick.Effects
 
 Rectangle {
-    color: Colors.color1
+    color: Colors.bgColor
 
     RowLayout {
         anchors.fill: parent
         spacing: 0
-        
+
         // SIDEBAR
         Rectangle {
-            
+
 
 
             Layout.preferredWidth: 200
             Layout.fillHeight: true
-            color: Colors.color2
+            color: Colors.panelColor
+
+            // Hairline against the grid
+            Rectangle {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: 1
+                color: Colors.lineColor
+            }
 
             Column {
                 anchors.fill: parent
-                anchors.margins: 10
-                spacing: 10
-                
+                anchors.margins: 14
+                spacing: 14
+
                 /*
                     GENRES
                 */
                 Column {
                     id: genres
                     width: parent.width
-                    spacing: 10
-                    
+                    spacing: 8
+
                     property bool genresOpen: true
-                    
+
                     // HEADER
                     Rectangle {
                         width: parent.width
-                        height: 40
+                        height: 26
                         color: "transparent"
-                        
+
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Genres"
-                            color: "white"
-                            font.pointSize: 20
+                            color: genresArea.containsMouse ? Colors.accentColor : Colors.textColor
+                            font.pixelSize: 13
+                            font.bold: true
+
+                            Behavior on color { ColorAnimation { duration: 120 } }
                         }
-                        
+
                         Image {
                             id: genresArrow
                             anchors.verticalCenter: parent.verticalCenter
@@ -54,7 +66,7 @@ Rectangle {
                             source: genres.genresOpen
                                     ? "qrc:/assets/symboles/dropdown_up.png"
                                     : "qrc:/assets/symboles/dropdown_down.png"
-                            sourceSize.height: 24
+                            sourceSize.height: 16
                             fillMode: Image.PreserveAspectFit
                             visible: false
                         }
@@ -62,21 +74,32 @@ Rectangle {
                         MultiEffect {
                             source: genresArrow
                             anchors.fill: genresArrow
-                            brightness: 1.0
+                            colorization: 1.0
+                            colorizationColor: genresArea.containsMouse ? Colors.accentColor : Colors.mutedColor
                         }
-                        
+
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: 1
+                            color: Colors.lineColor
+                        }
+
                         MouseArea {
+                            id: genresArea
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: genres.genresOpen = !genres.genresOpen
                         }
                     }
-                    
+
                     // CONTENT
                     Column {
                         width: parent.width
-                        spacing: 5
+                        spacing: 6
                         visible: genres.genresOpen
-                        
+
                         FilterCheckBox { text: "Horror" }
                         FilterCheckBox { text: "Simulation" }
                         FilterCheckBox { text: "Action" }
@@ -88,23 +111,26 @@ Rectangle {
                 Column {
                     id: platforms
                     width: parent.width
-                    spacing: 10
-                    
+                    spacing: 8
+
                     property bool platformsOpen: true
-                    
+
                     // HEADER
                     Rectangle {
                         width: parent.width
-                        height: 40
+                        height: 26
                         color: "transparent"
-                        
+
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "platforms"
-                            color: "white"
-                            font.pointSize: 20
+                            color: platformsArea.containsMouse ? Colors.accentColor : Colors.textColor
+                            font.pixelSize: 13
+                            font.bold: true
+
+                            Behavior on color { ColorAnimation { duration: 120 } }
                         }
-                        
+
                         Image {
                             id: platformsArrow
                             anchors.verticalCenter: parent.verticalCenter
@@ -112,7 +138,7 @@ Rectangle {
                             source: platforms.platformsOpen
                                     ? "qrc:/assets/symboles/dropdown_up.png"
                                     : "qrc:/assets/symboles/dropdown_down.png"
-                            sourceSize.height: 24
+                            sourceSize.height: 16
                             fillMode: Image.PreserveAspectFit
                             visible: false
                         }
@@ -120,21 +146,32 @@ Rectangle {
                         MultiEffect {
                             source: platformsArrow
                             anchors.fill: platformsArrow
-                            brightness: 1.0
+                            colorization: 1.0
+                            colorizationColor: platformsArea.containsMouse ? Colors.accentColor : Colors.mutedColor
                         }
-                        
+
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: 1
+                            color: Colors.lineColor
+                        }
+
                         MouseArea {
+                            id: platformsArea
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: platforms.platformsOpen = !platforms.platformsOpen
                         }
                     }
-                    
+
                     // CONTENT
                     Column {
                         width: parent.width
-                        spacing: 5
+                        spacing: 6
                         visible: platforms.platformsOpen
-                        
+
                         FilterCheckBox { text: "Windows" }
                         FilterCheckBox { text: "Linux" }
                     }
@@ -171,8 +208,8 @@ Rectangle {
                 anchors.centerIn: parent
                 visible: gameLibrary.count === 0
                 text: "No games"
-                color: "white"
-                font.pixelSize: 18
+                color: Colors.mutedColor
+                font.pixelSize: 13
             }
         }
     }
