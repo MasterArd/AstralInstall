@@ -153,7 +153,6 @@ Rectangle {
             cellHeight: cellWidth
 
             delegate: GameCard {
-                // "model" carries all roles GameLibrary::roleNames() lists.
                 required property var model
 
                 width: GridView.view.cellWidth
@@ -167,9 +166,6 @@ Rectangle {
                 genres: model.genres
                 version: model.version
             }
-
-            // Nothing to show: usually a missing or empty games.json.
-            // The reason is on stderr, see the [GameLibrary] warnings.
             Text {
                 anchors.centerIn: parent
                 visible: gameLibrary.count === 0
