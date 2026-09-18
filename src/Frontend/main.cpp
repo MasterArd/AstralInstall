@@ -8,6 +8,7 @@
 #include "backendbridge.h"
 #include "settings.h"
 #include "testconsole.h"
+#include "gamefiltermodel.h"
 
 
 int main(int argc, char *argv[])
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     Settings settings;
     // The console sends its commands over the same bridge as the UI.
     TestConsole testConsole(&backend);
-
+    GameFilterModel gameFilter;
 
     QObject::connect(&backend, &BackendBridge::releaseChecked,
                      [](const QString &repo, const QString &version) {
@@ -53,11 +54,19 @@ int main(int argc, char *argv[])
     // once it exists - gameLibrary.setGames() takes it as is.
     gameLibrary.loadFromFile(GameLibrary::defaultFilePath());
 
+    
+    gameFilter.setSourceModel(&gameLibrary);
+    
+
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("gameManager", &gameManager);
     engine.rootContext()->setContextProperty("gameLibrary", &gameLibrary);
     engine.rootContext()->setContextProperty("backend", &backend);
     engine.rootContext()->setContextProperty("testConsole", &testConsole);
+
+    engine.rootContext()->setContextProperty("gameFilter", &gameFilter);
+
+    
 
     // Registered as a proper QML singleton rather than a context
     // property, so Colors.qml can import it.

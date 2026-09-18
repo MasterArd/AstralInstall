@@ -173,6 +173,7 @@ Item {
                 Text {
                     id: genreText
                     color: card.mutedColor
+                    font.bold: true
                     visible: card.genres.length > 0
                     text: " \u00B7 " + card.genres.join(", ")
                     font.pixelSize: Math.round(12 * card.s)

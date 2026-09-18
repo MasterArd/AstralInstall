@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Effects
 
 Rectangle {
+    id: root
     color: Colors.bgColor
 
     RowLayout {
@@ -100,9 +101,21 @@ Rectangle {
                         spacing: 6
                         visible: genres.genresOpen
 
-                        FilterCheckBox { text: "Horror" }
-                        FilterCheckBox { text: "Simulation" }
-                        FilterCheckBox { text: "Action" }
+                        FilterCheckBox { 
+                            text: "horror"
+                            checked: gameFilter.horror
+                            onToggled: gameFilter.horror = checked 
+                        }
+                        FilterCheckBox { 
+                            text: "simulation" 
+                            checked: gameFilter.simulation
+                            onToggled: gameFilter.simulation = checked
+                        }
+                        FilterCheckBox { 
+                            text: "action" 
+                            checked: gameFilter.action
+                            onToggled: gameFilter.action = checked
+                        }
                     }
                 }
                 /*
@@ -172,8 +185,16 @@ Rectangle {
                         spacing: 6
                         visible: platforms.platformsOpen
 
-                        FilterCheckBox { text: "Windows" }
-                        FilterCheckBox { text: "Linux" }
+                        FilterCheckBox { 
+                            text: "windows" 
+                            checked: gameFilter.windows
+                            onToggled: gameFilter.windows = checked
+                        }
+                        FilterCheckBox { 
+                            text: "linux" 
+                            checked: gameFilter.linux
+                            onToggled: gameFilter.linux = checked
+                        }
                     }
                 }
             }
@@ -183,8 +204,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: gameLibrary
-
+            model: gameFilter
             property int columns: 3
             cellWidth: width / columns
             cellHeight: cellWidth
@@ -206,8 +226,8 @@ Rectangle {
             }
             Text {
                 anchors.centerIn: parent
-                visible: gameLibrary.count === 0
                 text: "No games"
+                visible: gameFilter.rowCount() === 0
                 color: Colors.mutedColor
                 font.pixelSize: 13
             }
