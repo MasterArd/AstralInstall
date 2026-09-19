@@ -13,7 +13,7 @@ CheckBox {
     checked: true
 
     padding: 0
-    spacing: 8
+    spacing: Ui.spacing
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
@@ -22,8 +22,8 @@ CheckBox {
 
     indicator: Rectangle {
         id: box
-        implicitWidth: 16
-        implicitHeight: 16
+        implicitWidth: Ui.boxSize
+        implicitHeight: Ui.boxSize
         x: control.leftPadding
         anchors.verticalCenter: parent.verticalCenter
         color: control.checked ? Colors.panelColor : "transparent"
@@ -37,6 +37,7 @@ CheckBox {
             anchors.centerIn: parent
             width: 12
             height: 12
+            scale: Ui.scale
             visible: control.checked
 
             Rectangle {
@@ -61,7 +62,7 @@ CheckBox {
         text: control.text
         color: control.hovered ? Colors.textColor
              : control.checked ? Colors.textColor : Colors.mutedColor
-        font.pixelSize: 13
+        font.pixelSize: Ui.fontSize
         verticalAlignment: Text.AlignVCenter
 
         Behavior on color { ColorAnimation { duration: 120 } }

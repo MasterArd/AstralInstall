@@ -6,6 +6,7 @@
         <file>qml/GameCard.qml</file>
         <file>qml/MyGamesPage.qml</file>
         <file>qml/Colors.qml</file>
+        <file>qml/Ui.qml</file>
         <file>qml/FilterCheckBox.qml</file>
         <file>qml/qmldir</file>
         <file>assets/symboles/dots.png</file>

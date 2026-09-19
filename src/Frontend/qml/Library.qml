@@ -16,7 +16,7 @@ Rectangle {
 
 
 
-            Layout.preferredWidth: 200
+            Layout.preferredWidth: Ui.panelWidth
             Layout.fillHeight: true
             color: Colors.panelColor
 
@@ -31,8 +31,8 @@ Rectangle {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: 14
-                spacing: 14
+                anchors.margins: Ui.margin
+                spacing: Ui.margin
 
                 /*
                     GENRES
@@ -40,21 +40,21 @@ Rectangle {
                 Column {
                     id: genres
                     width: parent.width
-                    spacing: 8
+                    spacing: Ui.spacing
 
                     property bool genresOpen: true
 
                     // HEADER
                     Rectangle {
                         width: parent.width
-                        height: 26
+                        height: Ui.headerHeight
                         color: "transparent"
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "Genres"
                             color: genresArea.containsMouse ? Colors.accentColor : Colors.textColor
-                            font.pixelSize: 13
+                            font.pixelSize: Ui.fontSize
                             font.bold: true
 
                             Behavior on color { ColorAnimation { duration: 120 } }
@@ -67,7 +67,7 @@ Rectangle {
                             source: genres.genresOpen
                                     ? "qrc:/assets/symboles/dropdown_up.png"
                                     : "qrc:/assets/symboles/dropdown_down.png"
-                            sourceSize.height: 16
+                            sourceSize.height: Ui.arrowSize
                             fillMode: Image.PreserveAspectFit
                             visible: false
                         }
@@ -98,7 +98,7 @@ Rectangle {
                     // CONTENT
                     Column {
                         width: parent.width
-                        spacing: 6
+                        spacing: Ui.itemSpacing
                         visible: genres.genresOpen
 
                         FilterCheckBox { 
@@ -124,21 +124,21 @@ Rectangle {
                 Column {
                     id: platforms
                     width: parent.width
-                    spacing: 8
+                    spacing: Ui.spacing
 
                     property bool platformsOpen: true
 
                     // HEADER
                     Rectangle {
                         width: parent.width
-                        height: 26
+                        height: Ui.headerHeight
                         color: "transparent"
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "platforms"
                             color: platformsArea.containsMouse ? Colors.accentColor : Colors.textColor
-                            font.pixelSize: 13
+                            font.pixelSize: Ui.fontSize
                             font.bold: true
 
                             Behavior on color { ColorAnimation { duration: 120 } }
@@ -151,7 +151,7 @@ Rectangle {
                             source: platforms.platformsOpen
                                     ? "qrc:/assets/symboles/dropdown_up.png"
                                     : "qrc:/assets/symboles/dropdown_down.png"
-                            sourceSize.height: 16
+                            sourceSize.height: Ui.arrowSize
                             fillMode: Image.PreserveAspectFit
                             visible: false
                         }
@@ -182,7 +182,7 @@ Rectangle {
                     // CONTENT
                     Column {
                         width: parent.width
-                        spacing: 6
+                        spacing: Ui.itemSpacing
                         visible: platforms.platformsOpen
 
                         FilterCheckBox { 
