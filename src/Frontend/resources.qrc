@@ -4,6 +4,7 @@
         <file>qml/Main.qml</file>
         <file>qml/Library.qml</file>
         <file>qml/GameCard.qml</file>
+        <file>qml/MyGameCard.qml</file>
         <file>qml/MyGamesPage.qml</file>
         <file>qml/Colors.qml</file>
         <file>qml/Ui.qml</file>

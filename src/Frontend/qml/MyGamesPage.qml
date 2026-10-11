@@ -4,7 +4,19 @@ import QtQuick.Controls
 
 
 Rectangle {
+    id: root
     color: Colors.bgColor
+
+    property var gamesModel: gamesList
+
+    ListModel {
+        id: gamesList
+
+        ListElement {
+            name: "Test_Name"
+            banner: "https://github.com/Hannes-swd/Astrallinstall_Template/raw/main/AstralInstall/Banner.png"
+        }
+    }
 
     Rectangle {
         width: parent.width
@@ -19,6 +31,36 @@ Rectangle {
             height: parent.height - 60
             color: Colors.bgColor
 
+            //game cards
+
+            GridView {
+                id: gamesGrid
+                anchors.fill: parent
+                anchors.margins: 16
+                clip: true
+                model: root.gamesModel
+
+                property int columns: Math.max(1, Math.floor(width / 240))
+                cellWidth: width / columns
+                cellHeight: 280
+
+                delegate: MyGameCard {
+                    required property var model
+
+                    width: gamesGrid.cellWidth
+                    height: gamesGrid.cellHeight
+                    name: model.name
+                    banner: model.banner
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Noch keine installierten Spiele"
+                    color: Colors.mutedColor
+                    font.pixelSize: 14
+                    visible: gamesGrid.count === 0
+                }
+            }
 
         }
 

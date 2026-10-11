@@ -89,7 +89,7 @@ Item {
             }
 
             // Fade the banner into the card body
-            /* I)M NOT SHURE
+            /* IM NOT SHURE
             Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
