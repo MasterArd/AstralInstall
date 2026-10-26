@@ -47,6 +47,7 @@ jobs:
             libgl1-mesa-dev \
             libx11-xcb-dev \
             libfontconfig1-dev \
+            zig \
             libdbus-1-dev
 
       # 5. Run your Makefile
