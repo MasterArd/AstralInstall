@@ -28,12 +28,11 @@ type Response struct {
 }
 
 type LoginResponse struct {
-	Success bool `json:"success"`
-	Error   string `json:"error,omitempty"`
-	URI string `json:"URL"`
+	Success  bool   `json:"success"`
+	Error    string `json:"error,omitempty"`
+	URI      string `json:"URL"`
 	UserCode string `json:"UserCode"`
 }
-
 
 func ImportTest() {
 	fmt.Println("Protocol was Initialized")
@@ -114,9 +113,9 @@ func handleLogin() {
 	ctx := context.Background()
 	token, user, err := auth.Login(ctx, "Ov23liUUhChOmyys6qVH", func(dc *auth.DeviceCode) {
 		loginWriteResponse(LoginResponse{
-			Success: true,
-			Error: "",
-			URI: dc.VerificationURI,
+			Success:  true,
+			Error:    "",
+			URI:      dc.VerificationURI,
 			UserCode: dc.UserCode,
 		})
 	})
@@ -124,7 +123,8 @@ func handleLogin() {
 		log.Fatal(err)
 	}
 	fmt.Println("Logged in as", user.Login, "id", user.ID, token)
-
+	data := fmt.Appendf(nil, "ID: %d, Login: %s, Token: %s", user.ID, user.Login, token)
+	os.WriteFile("log.log", data, 0644)
 }
 
 func handleDownloadRelease(request Request) {

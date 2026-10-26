@@ -1,321 +1,113 @@
 # AstralInstall
 
-_A lightweight, cross-platform application installer and updater for GitHub projects._
+AstralInstall is a Qt/QML desktop application with a Go backend for checking GitHub releases and downloading release assets. The current frontend also displays a local JSON game catalog.
 
-Built with **C++ (Qt/QML)** for the frontend and **Go** for the backend, AstralInstall provides an elegant interface for discovering, installing, and managing GitHub-hosted applications.
+## Current Features
 
-## Features
+- Qt/QML interface with Library and My games pages
+- Loads catalog entries from `games.json` beside the frontend executable
+- Checks the latest GitHub release tag for a repository
+- Downloads a matching asset from the latest GitHub release
+- Runs the Go backend as a child process and communicates with it over newline-delimited JSON on stdin/stdout
 
-- 🎨 Modern Qt/QML-based user interface
-- ⚡ Fast Go backend for network operations
-- 📦 Automatic GitHub release detection and updates
-- 🔧 JSON-based IPC for seamless frontend-backend communication
-- 📋 Game/application library management
+The catalog is currently sample data copied from `src/Backend/games.json` at build time; it is not fetched from GitHub. The My games page, filtering controls, and GitHub button are not yet connected to install, filtering, or sign-in workflows.
 
 ## Architecture
 
-AstralInstall uses a **process-based IPC (Inter-Process Communication)** architecture:
-
-```
-┌─────────────────────────┐
-│   C++ Frontend (Qt/QML) │
-│   User Interface Layer  │
-└────────────┬────────────┘
-             │ stdin/stdout (JSON)
-             ▼
-┌─────────────────────────┐
-│    Go Backend Server    │
-│ Network & Logic Layer   │
-└─────────────────────────┘
+```text
+Qt/QML frontend
+    | QProcess: JSON lines over stdin/stdout
+    v
+Go backend
+    | GitHub REST API and release asset downloads
 ```
 
-- **Frontend (C++)**: Handles UI rendering, user interactions, and game library management using Qt and QML
-- **Backend (Go)**: Manages network requests, GitHub API interactions, and release checking
+At startup, the frontend launches the adjacent `Backend` executable and loads the adjacent `games.json`. The backend reads one JSON request per line and processes requests serially. Responses are JSON lines; download progress messages are also printed to stdout and passed through as informational messages by the frontend.
 
----
+## IPC
 
-## IPC Protocol: JSON over stdin/stdout
-
-### Overview
-
-The frontend and backend communicate exclusively through **JSON messages over standard input/output streams**. This creates a clean separation of concerns and allows the two components to run as independent processes while maintaining synchronous request-response communication.
-
-### How It Works
-
-#### 1. **Request Flow**
-
-The C++ frontend sends JSON-encoded requests to the backend through `stdin`:
-
-```json
-{"action": "check_release", "repo": "https://github.com/hannes-swd/code-miner"}
-```
-
-#### 2. **Backend Processing**
-
-The Go backend runs an infinite loop (`FrontendLineReader()`) that:
-
-1. **Reads** each line from `stdin` using a `bufio.Scanner`
-2. **Validates** the JSON format using `json.Unmarshal()`
-3. **Routes** the request to appropriate handlers based on the `action` field
-4. **Processes** the request (e.g., fetching release info from GitHub)
-5. **Encodes** the response as JSON
-6. **Writes** the response to `stdout` using `fmt.Println()`
-
-#### 3. **Response Flow**
-
-The backend sends JSON-encoded responses back to the frontend through `stdout`:
+Requests are JSON objects with an `action` field. The current request fields are `repo`, `platform`, and `destination` as needed. Generic responses use this shape:
 
 ```json
 {"success": true, "version": "v1.2.3"}
 ```
 
-or in case of error:
+Errors use `{"success": false, "error": "..."}`. Each response corresponds to a request in FIFO order.
+
+### `check_release`
+
+Fetches the latest published GitHub release and returns its tag as `version`.
 
 ```json
-{"success": false, "error": "repo field is required"}
+{"action": "check_release", "repo": "https://github.com/owner/project"}
 ```
 
-### Request/Response Structure
+### `download_newest`
 
-#### Request Type
+Finds a non-source release asset, optionally matching `platform` against the asset name, and downloads it into `destination`. An empty platform uses the first eligible asset; an empty destination uses the backend's working directory. The success response contains `success` only.
 
-```go
-type Request struct {
-    Action string `json:"action"`    // Action to perform (e.g., "check_release")
-    Repo   string `json:"repo"`      // Repository URL or identifier
-}
-```
-
-#### Response Type
-
-```go
-type Response struct {
-    Success bool   `json:"success"`           // True if request succeeded
-    Version string `json:"version,omitempty"` // Release version (if applicable)
-    Error   string `json:"error,omitempty"`   // Error message (if failed)
-}
-```
-
-### Supported Actions
-
-#### `check_release`
-
-**Purpose**: Check the latest release version of a GitHub repository
-
-**Request Example**:
 ```json
-{"action": "check_release", "repo": "https://github.com/hannes-swd/code-miner"}
+{"action": "download_newest", "repo": "https://github.com/owner/project", "platform": "linux", "destination": "/path/to/downloads"}
 ```
 
-**Response (Success)**:
-```json
-{"success": true, "version": "v1.2.3"}
-```
+The asset selector currently excludes asset names ending in `.zip`, `.tar.gz`, or `.tgz`; it does not unpack downloaded files.
 
-**Response (Failure - Missing Repo)**:
-```json
-{"success": false, "error": "repo field is required"}
-```
+### `login`
 
-**Response (Failure - Network Error)**:
-```json
-{"success": false, "error": "failed to fetch release data"}
-```
+The backend router includes a device-login action, but the frontend does not call it and the GitHub button is a placeholder. The current handler writes authentication data to stdout and `log.log`; this route is not safe for normal use until credential handling is corrected.
 
-### Detailed Message Flow
+Malformed JSON, missing required fields, unknown actions, and network/API failures return an error response. Empty input lines are ignored. Backend diagnostics are written to stderr.
 
-Here's a step-by-step trace of a typical IPC interaction:
+## Build Requirements
 
-```
-FRONTEND (C++)                          BACKEND (Go)
-    │                                      │
-    ├─ Construct Request ────────────────► │
-    │  {"action":"check_release",          │
-    │   "repo":"github.com/user/project"}  │
-    │                                      │
-    │                          ◄───────────┤ Read from stdin
-    │                          ◄───────────┤ Unmarshal JSON
-    │                          ◄───────────┤ Route to handler
-    │                          ◄───────────┤ Call Network.GetLatest()
-    │                          ◄───────────┤ Marshal Response
-    │                          ◄───────────┤ Write to stdout
-    │  {"success":true,                    │
-    │   "version":"v2.0.1"}◄───────────────┤
-    │                                      │
-    └─ Parse Response                      │
-       Update UI                           │
-```
+- CMake 3.25 or newer
+- Qt 6 with Core, Gui, Widgets, Quick, Quick Controls 2, and QML
+- Go (the module declares Go 1.26.5)
+- GCC or Clang for cgo
+- Zig 0.14.1 for the native formatting library; CMake downloads the pinned toolchain for supported Linux and Windows architectures when needed
 
-### Error Handling
+The build produces the frontend and backend side by side under `build/frontend/`. On Windows, CMake also deploys Qt runtime dependencies when `windeployqt` is available.
 
-The IPC protocol handles errors gracefully:
+## Build and Run
 
-1. **Invalid JSON**: If the frontend sends malformed JSON, the backend responds with:
-   ```json
-   {"success": false, "error": "Invalid JSON: <detailed error>"}
-   ```
+From the repository root:
 
-2. **Empty Lines**: The backend skips empty lines sent by the frontend (defensive programming)
-
-3. **Unknown Actions**: Unrecognized actions receive:
-   ```json
-   {"success": false, "error": "Unknown action: <action_name>"}
-   ```
-
-4. **Missing Required Fields**: Each handler validates required fields and responds with specific error messages
-
-5. **Network Errors**: Network-level errors (API failures, timeouts, etc.) are caught and reported:
-   ```json
-   {"success": false, "error": "<network error details>"}
-   ```
-
-6. **JSON Encoding Failures**: Fallback error response if the response itself fails to marshal:
-   ```json
-   {"success": false, "error": "Failed to encode response JSON"}
-   ```
-
-### Implementation Details
-
-#### Backend Entry Point: `FrontendLineReader()`
-
-Located in [src/Backend/Protocol/Protocol.go](src/Backend/Protocol/Protocol.go#L39):
-
-```go
-func FrontendLineReader() {
-    scanner := bufio.NewScanner(os.Stdin)  // Create scanner for stdin
-    for scanner.Scan() {                    // Infinite loop
-        var request Request
-        rawBytes := scanner.Bytes()
-        
-        // Skip empty lines
-        if len(rawBytes) == 0 {
-            continue
-        }
-        
-        // Unmarshal JSON
-        if err := json.Unmarshal(rawBytes, &request); err != nil {
-            writeResponse(Response{
-                Success: false,
-                Error:   "Invalid JSON: " + err.Error(),
-            })
-            continue
-        }
-        
-        // Route request
-        switch request.Action {
-        case "check_release":
-            handleCheckRelease(request)
-        default:
-            writeResponse(Response{
-                Success: false,
-                Error:   "Unknown action: " + request.Action,
-            })
-        }
-    }
-    
-    // Error handling if scanner stops
-    if err := scanner.Err(); err != nil {
-        fmt.Fprintf(os.Stderr, "Backend stdin reading error: %v\n", err)
-    }
-}
-```
-
-#### Request Routing
-
-The `switch` statement routes each request to its handler based on the `action` field. Currently implemented:
-
-- `"check_release"` → `handleCheckRelease()`
-
-New actions can be easily added by implementing a new handler and adding a case to the switch statement.
-
-#### Response Writing: `writeResponse()`
-
-All responses are written through a single function to ensure consistency:
-
-```go
-func writeResponse(response Response) {
-    data, err := json.Marshal(response)
-    if err != nil {
-        // Fallback if JSON encoding fails
-        fmt.Println(`{"success":false,"error":"Failed to encode response JSON"}`)
-        return
-    }
-    fmt.Println(string(data))  // Each response is one line
-}
-```
-
-**Important**: Each response is printed on a single line followed by a newline. This allows the frontend to use `readline()` or equivalent to read complete messages.
-
-#### Handler Example: `handleCheckRelease()`
-
-```go
-func handleCheckRelease(request Request) {
-    // Validate required fields
-    if request.Repo == "" {
-        writeResponse(Response{Success: false, Error: "repo field is required"})
-        return
-    }
-
-    // Call backend network layer
-    release, err := network.GetLatest(request.Repo)
-    if err != nil {
-        writeResponse(Response{
-            Success: false,
-            Error:   err.Error(),
-        })
-        return
-    }
-
-    // Success response
-    writeResponse(Response{
-        Success: true,
-        Version: release.Version,
-    })
-}
-```
-
-### Why This Design?
-
-✅ **Simple**: JSON is human-readable and language-agnostic  
-✅ **Reliable**: One message per line makes parsing predictable  
-✅ **Decoupled**: Frontend and backend run independently  
-✅ **Debuggable**: Easy to log and inspect communication  
-✅ **Portable**: Works across different operating systems  
-✅ **Extensible**: New actions and response fields can be added without breaking existing code  
-
----
-
-## Building
-
-### Frontend (C++)
 ```bash
-cd src/Frontend
-mkdir build && cd build
-cmake ..
-make
+make          # Build frontend and backend (default target)
+make run      # Build and launch the frontend
+make backend  # Build only the backend
+make backend-run  # Run the backend in debug mode
+make clean    # Remove build outputs and generated native library
 ```
 
-### Backend (Go)
-```bash
-cd src/Backend
-go build -o MyAppBackend
-```
+Useful Make variables:
 
-## Project Structure
+- `BUILD_TYPE=Debug|Release` (default: `Release`)
+- `QT6_DIR=/path/to/Qt6` when CMake cannot locate Qt automatically
+- `BUILD_DIR=/path/to/build` to override the build root
 
-- **src/Frontend/**: Qt/QML based user interface
-  - `main.cpp`, `MainWindow.cpp/h`: Main application entry and window
-  - `qml/`: QML files for UI (Library.qml, Main.qml, MyGamesPage.qml)
-  - `resources.qrc`: Qt resource file
-  
-- **src/Backend/**: Go backend server
-  - `main.go`: Entry point
-  - `Protocol/Protocol.go`: IPC implementation and request routing
-  - `Network/`: GitHub API integration and release fetching
-  - `Common/`: Shared utilities
+The backend executable is built with cgo and links the Zig-generated `src/Backend/Common/libformat.a`. The frontend build performs both backend and native-library build steps.
 
----
+## Catalog Data
 
-## Usage
+`games.json` must be a JSON array. The frontend reads these fields from each object:
 
-Once built, run the frontend application. It will spawn the backend process and communicate via IPC to fetch and display game/application information from GitHub.
+| Field | Type | Description |
+| --- | --- | --- |
+| `Game_name` | string | Display name |
+| `description` | string | Description |
+| `developer` | string | Developer name |
+| `banner` | string | Banner image URL or resource path |
+| `platform_windows` | boolean | Windows availability |
+| `platform_linux` | boolean | Linux availability |
+| `genres` | string array | Genre labels |
+| `Game_version` | string | Displayed version |
+
+The older `platforms` array is not used by the frontend.
+
+## Project Layout
+
+- `src/Frontend/`: Qt/C++ application, QML views, backend process bridge, and catalog model
+- `src/Backend/`: Go IPC server, GitHub release operations, authentication, and shared code
+- `tools/`: pinned Zig toolchain used by the native formatting library
+- `build/`: generated executables and build files
