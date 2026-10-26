@@ -9,5 +9,23 @@
     "platform_linux": true,
     "genres": ["simulation", "horror"],
     "Game_version": "1.0.1"
+  },
+  {
+    "Game_name": "Test_Name",
+    "description": "Example Game description",
+    "developer": "Hannes-swd",
+    "banner": "https://github.com/Hannes-swd/Astrallinstall_Template/raw/main/AstralInstall/Banner.png",
+    "platforms": [
+      "OLD THING NOT USED ANIMORE",
+      "windows",
+      "linux"
+    ],
+    "platform_windows": true,
+    "platform_linux": true,
+    "genres": [
+      "Simulation",
+      "horror"
+    ],
+    "Game_version": "1.0.1"
   }
 ]
