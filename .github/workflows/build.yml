@@ -1,4 +1,4 @@
-name: Build AstralInstall
+name: Build AstralInstall.
 
 on:
   push:
