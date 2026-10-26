@@ -1,0 +1,56 @@
+name: Build AstralInstall
+
+on:
+  push:
+    branches: [ "main", "master", "*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      # 1. Check out repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      # 3. Set up Qt / QML framework
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.2'   # Match your local Qt version
+          cached: 'true'
+
+      # 4. Install Linux system libraries & build tools
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            make \
+            libgl1-mesa-dev \
+            libx11-xcb-dev \
+            libfontconfig1-dev \
+            libdbus-1-dev
+
+      # 5. Run your Makefile
+      - name: Build with Make
+        shell: bash
+        run: |
+          make
