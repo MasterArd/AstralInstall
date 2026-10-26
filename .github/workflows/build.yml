@@ -27,14 +27,20 @@ jobs:
         with:
           go-version: '1.22'
 
-      # 3. Set up Qt / QML framework
+      # 3. Set up Zig compiler
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: '0.11.0' # Change this to match the exact Zig version you use locally (e.g., 0.12.0, master, etc.)
+
+      # 4. Set up Qt / QML framework
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.6.2'   # Match your local Qt version
+          version: '6.6.2'
           cached: 'true'
 
-      # 4. Install Linux system libraries & build tools
+      # 5. Install Linux system libraries & build tools (removed zig from apt)
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
         run: |
@@ -47,10 +53,9 @@ jobs:
             libgl1-mesa-dev \
             libx11-xcb-dev \
             libfontconfig1-dev \
-            zig \
             libdbus-1-dev
 
-      # 5. Run your Makefile
+      # 6. Run your Makefile
       - name: Build with Make
         shell: bash
         run: |
