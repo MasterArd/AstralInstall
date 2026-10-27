@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)  # 3.25 fuer 'cmake -E env --modify'
-project(MyAppFrontend)
+project(AstralInstal)
 
 # Hard-coded Qt location for this Windows box. Elsewhere (or when passed on
 # the command line via -DQt6_DIR=...) let CMake find Qt itself.
@@ -17,7 +17,7 @@ find_package(Qt6 COMPONENTS Core Gui Widgets Quick QuickControls2 Qml REQUIRED)
 file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-add_executable(MyAppFrontend
+add_executable(AstralInstal
     ${SOURCES}
     ${HEADERS}
     resources.qrc
@@ -29,12 +29,12 @@ add_executable(MyAppFrontend
 # Die Plugins bleiben 6.11.1, die DLLs werden 6.11.0, und die App stirbt beim
 # Start mit "Could not load the Qt platform plugin windows". windeployqt
 # laeuft vorher, kann also nichts retten. Darum vcpkg fuer dieses Projekt aus.
-set_target_properties(MyAppFrontend PROPERTIES
+set_target_properties(AstralInstal PROPERTIES
     VS_GLOBAL_VcpkgEnabled false
     VS_GLOBAL_VcpkgApplocalDeps false
 )
 
-target_link_libraries(MyAppFrontend
+target_link_libraries(AstralInstal
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -44,7 +44,7 @@ target_link_libraries(MyAppFrontend
 )
 
 # ---------------------------------------------------------------------------
-# Backend: erst die Zig-Bibliothek, dann das Go-Binary.
+# Backend: erst die Zig-Bibliothek, das Go-Binary.
 #
 # Beides landet neben der Frontend-Executable, damit BackendBridge es ueber
 # applicationDirPath() findet. Das Binary heisst "Backend" / "Backend.exe",
@@ -63,10 +63,10 @@ find_program(GO_EXECUTABLE go)
 # TEMPORARY: the mocked library data. GameLibrary reads it from next to the
 # executable, so keep the copy in step with the source file on every build.
 # Delete this block once the games come from the backend.
-add_custom_command(TARGET MyAppFrontend POST_BUILD
+add_custom_command(TARGET AstralInstal POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${BACKEND_DIR}/games.json"
-            "$<TARGET_FILE_DIR:MyAppFrontend>/games.json"
+            "$<TARGET_FILE_DIR:AstralInstal>/games.json"
     COMMENT "Copying games.json"
 )
 
@@ -177,7 +177,7 @@ else()
 endif()
 
 if(GO_EXECUTABLE AND ZIG_EXECUTABLE AND CGO_C_COMPILER)
-    add_custom_command(TARGET MyAppFrontend POST_BUILD
+    add_custom_command(TARGET AstralInstal POST_BUILD
         COMMAND "${ZIG_EXECUTABLE}" build-lib -static -O ReleaseFast
                 ${ZIG_TARGET_OPTION}
                 "-femit-bin=${ZIG_LIBRARY}" "${ZIG_SOURCE}"
@@ -188,12 +188,12 @@ if(GO_EXECUTABLE AND ZIG_EXECUTABLE AND CGO_C_COMPILER)
     # gcc startet cc1.exe und collect2.exe, die libwinpthread-1.dll aus dem
     # bin-Verzeichnis des Compilers brauchen. Fehlt das im PATH, brechen sie
     # ohne jede Fehlermeldung mit exit 1 ab. Darum PATH ergaenzen.
-    add_custom_command(TARGET MyAppFrontend POST_BUILD
+    add_custom_command(TARGET AstralInstal POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E env
                 --modify "PATH=path_list_prepend:${CGO_COMPILER_DIR}"
                 CGO_ENABLED=1 "CC=${CGO_C_COMPILER}"
                 "${GO_EXECUTABLE}" build
-                -o "$<TARGET_FILE_DIR:MyAppFrontend>/Backend${CMAKE_EXECUTABLE_SUFFIX}" .
+                -o "$<TARGET_FILE_DIR:AstralInstal>/Backend${CMAKE_EXECUTABLE_SUFFIX}" .
         WORKING_DIRECTORY "${BACKEND_DIR}"
         COMMENT "Building Go backend"
     )
@@ -211,10 +211,10 @@ find_program(WINDEPLOYQT_EXECUTABLE windeployqt
 )
 
 if(WIN32 AND WINDEPLOYQT_EXECUTABLE)
-    add_custom_command(TARGET MyAppFrontend POST_BUILD
+    add_custom_command(TARGET AstralInstal POST_BUILD
         COMMAND "${WINDEPLOYQT_EXECUTABLE}"
                 --qmldir "${CMAKE_CURRENT_SOURCE_DIR}"
-                "$<TARGET_FILE:MyAppFrontend>"
+                "$<TARGET_FILE:AstralInstal>"
         COMMENT "Deploying Qt runtime"
     )
 endif()
