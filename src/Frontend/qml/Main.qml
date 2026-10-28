@@ -6,11 +6,254 @@ import QtQuick.Effects
 
 
 Window {
+    id: root
     width: 800
     height: 600
     visible: true
     title: "Astral"
     color: Colors.bgColor
+
+    property string githubLoginName: ""
+    property bool githubLoginPending: false
+    property string githubLoginUrl: ""
+    property string githubUserCode: ""
+
+    Connections {
+        target: backend
+
+        function onLoginDeviceCodeReceived(url, userCode) {
+            root.githubLoginUrl = url
+            root.githubUserCode = userCode
+            loginCodeDialog.open()
+            if (!Qt.openUrlExternally(url))
+                console.warn("Could not open GitHub login URL:", url)
+        }
+
+        function onLoginSucceeded(login) {
+            root.githubLoginName = login
+            root.githubLoginPending = false
+            loginCodeDialog.close()
+        }
+
+        function onLoginFailed(error) {
+            root.githubLoginPending = false
+            loginCodeDialog.close()
+            loginErrorDialog.text = error
+            loginErrorDialog.open()
+        }
+    }
+
+    Dialog {
+        id: loginCodeDialog
+        modal: true
+        anchors.centerIn: parent
+        width: 390
+        padding: 20
+        spacing: 16
+        closePolicy: Popup.NoAutoClose
+
+        background: Rectangle {
+            color: Colors.panelColor
+            border.color: Colors.lineColor
+            border.width: 1
+        }
+
+        header: Rectangle {
+            implicitHeight: 54
+            color: "transparent"
+
+            Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.top: parent.top
+                anchors.topMargin: 14
+                text: "Sign in with GitHub"
+                color: Colors.textColor
+                font.pixelSize: 18
+                font.bold: true
+            }
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 14
+
+            Text {
+                text: "Open GitHub and enter this device code to authorize AstralInstall."
+                color: Colors.textColor
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+                Layout.maximumWidth: 350
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 70
+                color: Colors.bgColor
+                border.color: Colors.lineColor
+                border.width: 1
+
+                TextEdit {
+                    anchors.centerIn: parent
+                    text: root.githubUserCode
+                    color: Colors.accentColor
+                    font.pixelSize: 28
+                    font.bold: true
+                    font.letterSpacing: 2
+                    readOnly: true
+                    selectionColor: Colors.lineColor
+                    selectByMouse: true
+                }
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 8
+
+                BusyIndicator {
+                    running: root.githubLoginPending
+                    implicitWidth: 22
+                    implicitHeight: 22
+                    palette.highlight: Colors.accentColor
+                }
+                Text {
+                    text: "Waiting for approval on GitHub..."
+                    color: Colors.accentColor
+                    font.pixelSize: 13
+                }
+            }
+            Text {
+                text: "This sign-in attempt expires after 30 minutes."
+                color: Colors.mutedColor
+                font.pixelSize: 11
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 2
+            }
+        }
+
+        footer: Item {
+            implicitHeight: 56
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                anchors.bottomMargin: 10
+                spacing: 10
+
+                Item {
+                    Layout.fillWidth: true
+                }
+                Button {
+                    id: openGithubButton
+                    text: "Open GitHub"
+                    onClicked: Qt.openUrlExternally(root.githubLoginUrl)
+
+                    contentItem: Text {
+                        text: openGithubButton.text
+                        color: Colors.bgColor
+                        font.pixelSize: 13
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: openGithubButton.hovered ? "#A4D0B2" : Colors.accentColor
+                        implicitWidth: 120
+                        implicitHeight: 36
+                    }
+                }
+                Button {
+                    id: closeLoginDialogButton
+                    text: "Close"
+                    onClicked: loginCodeDialog.close()
+
+                    contentItem: Text {
+                        text: closeLoginDialogButton.text
+                        color: Colors.textColor
+                        font.pixelSize: 13
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: closeLoginDialogButton.hovered ? Colors.lineColor : Colors.bgColor
+                        border.color: Colors.lineColor
+                        border.width: 1
+                        implicitWidth: 90
+                        implicitHeight: 36
+                    }
+                }
+            }
+        }
+    }
+
+    Dialog {
+        id: loginErrorDialog
+        property string text: ""
+        modal: true
+        anchors.centerIn: parent
+        width: 360
+        padding: 20
+        spacing: 14
+
+        background: Rectangle {
+            color: Colors.panelColor
+            border.color: Colors.lineColor
+            border.width: 1
+        }
+
+        header: Rectangle {
+            implicitHeight: 54
+            color: "transparent"
+
+            Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.top: parent.top
+                anchors.topMargin: 14
+                text: "GitHub sign-in failed"
+                color: Colors.textColor
+                font.pixelSize: 18
+                font.bold: true
+            }
+        }
+
+        contentItem: Text {
+            text: loginErrorDialog.text
+            color: Colors.textColor
+            wrapMode: Text.Wrap
+            Layout.maximumWidth: 320
+        }
+
+        footer: Item {
+            implicitHeight: 56
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                anchors.bottomMargin: 10
+
+                Button {
+                    id: loginErrorOkButton
+                    text: "OK"
+                    Layout.alignment: Qt.AlignRight
+                    onClicked: loginErrorDialog.close()
+
+                    contentItem: Text {
+                        text: loginErrorOkButton.text
+                        color: Colors.bgColor
+                        font.pixelSize: 13
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: loginErrorOkButton.hovered ? "#A4D0B2" : Colors.accentColor
+                        implicitWidth: 90
+                        implicitHeight: 36
+                    }
+                }
+            }
+        }
+    }
 
     // Top bar
     Rectangle {
@@ -114,7 +357,9 @@ Window {
             //gh login
             Button {
                 id: githubButton
-                text: "GitHub"
+                text: root.githubLoginPending
+                      ? "Waiting..."
+                      : root.githubLoginName === "" ? "GitHub" : root.githubLoginName
 
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: 26
@@ -123,6 +368,7 @@ Window {
                 hoverEnabled: true
                 focusPolicy: Qt.NoFocus
                 flat: true
+                enabled: !root.githubLoginPending || root.githubUserCode !== ""
 
                 background: Rectangle {
                     color: Colors.bgColor
@@ -144,13 +390,22 @@ Window {
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Text {
-                        text: "GitHub"
+                        text: githubButton.text
                         color: Colors.accentColor
                         font.pixelSize: 12
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
-                onClicked: {}//make githb login
+                onClicked: {
+                    if (root.githubLoginPending) {
+                        loginCodeDialog.open()
+                    } else {
+                        root.githubUserCode = ""
+                        root.githubLoginUrl = ""
+                        root.githubLoginPending = true
+                        backend.login()
+                    }
+                }
             }
 
             Item {

@@ -51,6 +51,9 @@ public slots:
                         const QString &platform = QString(),
                         const QString &destination = QString());
 
+    // Starts GitHub's device login flow.
+    void login();
+
 signals:
     void runningChanged();
 
@@ -59,6 +62,11 @@ signals:
 
     // Successful response to downloadNewest()
     void downloadFinished(const QString &repo, const QString &destination);
+
+    // GitHub device login responses.
+    void loginDeviceCodeReceived(const QString &url, const QString &userCode);
+    void loginSucceeded(const QString &login);
+    void loginFailed(const QString &error);
 
     // The backend rejected the request: unknown action, network error,
     // repo not found, timeout, ...
@@ -98,6 +106,7 @@ private:
     QByteArray m_buffer;
     QQueue<PendingRequest> m_pending;
     QTimer m_timeoutTimer;
+    QString m_lastLoginError;
 };
 
 #endif // BACKENDBRIDGE_H

@@ -14,10 +14,12 @@ constexpr int kRequestTimeoutMs = 15000;
 // A download fetches a whole release file, which legitimately takes
 // longer than an API query.
 constexpr int kDownloadTimeoutMs = 10 * 60 * 1000;
+constexpr int kLoginTimeoutMs = 30 * 60 * 1000;
 constexpr int kProcessWaitMs = 3000;
 
 const QString kActionCheckRelease = QStringLiteral("check_release");
 const QString kActionDownloadNewest = QStringLiteral("download_newest");
+const QString kActionLogin = QStringLiteral("login");
 }
 
 BackendBridge::BackendBridge(QObject *parent)
@@ -133,10 +135,26 @@ void BackendBridge::downloadNewest(const QString &repo,
                 PendingRequest{kActionDownloadNewest, repo, destination, false});
 }
 
+void BackendBridge::login()
+{
+    for (const PendingRequest &pending : m_pending) {
+        if (pending.action == kActionLogin)
+            return;
+    }
+
+    m_lastLoginError.clear();
+    QJsonObject request;
+    request[QStringLiteral("action")] = kActionLogin;
+    sendRequest(request, PendingRequest{kActionLogin, QString(), QString(), false});
+}
+
 void BackendBridge::sendRequest(const QJsonObject &request, const PendingRequest &pending)
 {
     if (!isRunning() && !start()) {
-        emit requestFailed(pending.repo, tr("Backend is not running"));
+        if (pending.action == kActionLogin)
+            emit loginFailed(tr("Backend is not running"));
+        else
+            emit requestFailed(pending.repo, tr("Backend is not running"));
         return;
     }
 
@@ -146,9 +164,12 @@ void BackendBridge::sendRequest(const QJsonObject &request, const PendingRequest
     line.append('\n');
 
     if (m_process.write(line) == -1) {
-        emit requestFailed(pending.repo,
-                           tr("Failed to write to backend: %1")
-                               .arg(m_process.errorString()));
+        const QString error = tr("Failed to write to backend: %1")
+                                  .arg(m_process.errorString());
+        if (pending.action == kActionLogin)
+            emit loginFailed(error);
+        else
+            emit requestFailed(pending.repo, error);
         return;
     }
 
@@ -178,6 +199,23 @@ void BackendBridge::onStdout()
 
 void BackendBridge::handleLine(const QByteArray &line)
 {
+    if (!m_pending.isEmpty() && m_pending.head().action == kActionLogin) {
+        const QString text = QString::fromUtf8(line);
+        const QString successPrefix = QStringLiteral("Logged in as ");
+        const int idSeparator = text.indexOf(QStringLiteral(" id "),
+                                             successPrefix.size());
+        if (text.startsWith(successPrefix) && idSeparator > successPrefix.size()) {
+            const QString login = text.mid(successPrefix.size(),
+                                           idSeparator - successPrefix.size());
+            const PendingRequest pending = m_pending.dequeue();
+            m_timeoutTimer.stop();
+            armTimeout();
+            if (!pending.timedOut)
+                emit loginSucceeded(login);
+            return;
+        }
+    }
+
     QJsonParseError parseError{};
     const QJsonDocument doc = QJsonDocument::fromJson(line, &parseError);
 
@@ -188,7 +226,10 @@ void BackendBridge::handleLine(const QByteArray &line)
         // error - the actual JSON response still follows. So pass them
         // through and keep waiting instead of clearing the open
         // request.
-        emit backendMessage(QString::fromUtf8(line));
+        // The current backend prints the access token on its success line.
+        // Do not forward login output to UI logs or other listeners.
+        if (m_pending.isEmpty() || m_pending.head().action != kActionLogin)
+            emit backendMessage(QString::fromUtf8(line));
         return;
     }
 
@@ -201,6 +242,30 @@ void BackendBridge::handleLine(const QByteArray &line)
         return;
     }
 
+    const PendingRequest &head = m_pending.head();
+    const QJsonObject obj = doc.object();
+    if (head.action == kActionLogin) {
+        const QString url = obj.value(QStringLiteral("URL")).toString();
+        const QString userCode = obj.value(QStringLiteral("UserCode")).toString();
+        if (obj.value(QStringLiteral("success")).toBool()
+            && !url.isEmpty() && !userCode.isEmpty()) {
+            m_timeoutTimer.stop();
+            armTimeout();
+            emit loginDeviceCodeReceived(url, userCode);
+            return;
+        }
+
+        const PendingRequest pending = m_pending.dequeue();
+        m_timeoutTimer.stop();
+        armTimeout();
+        if (!pending.timedOut) {
+            const QString error = obj.value(QStringLiteral("error")).toString(
+                tr("Backend returned an incomplete GitHub login response"));
+            emit loginFailed(error);
+        }
+        return;
+    }
+
     const PendingRequest pending = m_pending.dequeue();
     m_timeoutTimer.stop();
     armTimeout();
@@ -210,12 +275,13 @@ void BackendBridge::handleLine(const QByteArray &line)
     if (pending.timedOut)
         return;
 
-    const QJsonObject obj = doc.object();
-
     if (!obj.value(QStringLiteral("success")).toBool()) {
         const QString error = obj.value(QStringLiteral("error"))
                                   .toString(tr("Unknown error"));
-        emit requestFailed(pending.repo, error);
+        if (pending.action == kActionLogin)
+            emit loginFailed(error);
+        else
+            emit requestFailed(pending.repo, error);
         return;
     }
 
@@ -240,8 +306,11 @@ void BackendBridge::armTimeout()
 
 int BackendBridge::timeoutForAction(const QString &action)
 {
-    return action == kActionDownloadNewest ? kDownloadTimeoutMs
-                                           : kRequestTimeoutMs;
+    if (action == kActionDownloadNewest)
+        return kDownloadTimeoutMs;
+    if (action == kActionLogin)
+        return kLoginTimeoutMs;
+    return kRequestTimeoutMs;
 }
 
 void BackendBridge::onTimeout()
@@ -255,7 +324,10 @@ void BackendBridge::onTimeout()
     PendingRequest &head = m_pending.head();
     if (!head.timedOut) {
         head.timedOut = true;
-        emit requestFailed(head.repo, tr("Request timed out"));
+        if (head.action == kActionLogin)
+            emit loginFailed(tr("GitHub login timed out"));
+        else
+            emit requestFailed(head.repo, tr("Request timed out"));
     }
 
     m_timeoutTimer.start(timeoutForAction(head.action));
@@ -267,6 +339,8 @@ void BackendBridge::onStderr()
     // just pass it through.
     const QByteArray err = m_process.readAllStandardError().trimmed();
     if (!err.isEmpty()) {
+        if (!m_pending.isEmpty() && m_pending.head().action == kActionLogin)
+            m_lastLoginError = QString::fromUtf8(err);
         qWarning("[Backend] %s", err.constData());
         emit backendMessage(QString::fromUtf8(err));
     }
@@ -281,6 +355,8 @@ void BackendBridge::onProcessError(QProcess::ProcessError error)
 void BackendBridge::onFinished(int exitCode, QProcess::ExitStatus status)
 {
     m_timeoutTimer.stop();
+    onStdout();
+    onStderr();
     m_buffer.clear();
 
     failAllPending(tr("Backend stopped"));
@@ -297,7 +373,16 @@ void BackendBridge::failAllPending(const QString &reason)
 {
     while (!m_pending.isEmpty()) {
         const PendingRequest pending = m_pending.dequeue();
-        if (!pending.timedOut)
+        if (pending.timedOut)
+            continue;
+        if (pending.action == kActionLogin) {
+            const QString error = m_lastLoginError.isEmpty()
+                                      ? tr("GitHub login failed: %1").arg(reason)
+                                      : m_lastLoginError;
+            emit loginFailed(error);
+        } else {
             emit requestFailed(pending.repo, reason);
+        }
     }
+    m_lastLoginError.clear();
 }
