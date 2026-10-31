@@ -17,17 +17,8 @@ func main() {
 	if *debugPtr {
 		network.GetLatest("https://github.com/hannes-swd/code-miner")
 		fmt.Println("random seed is:", common.Seed())
+		protocol.FrontendLineReader()
 	} else {
-		/*
-		ctx := context.Background()
-		token, user, err := auth.Login(ctx, "Ov23liUUhChOmyys6qVH", func(dc *auth.DeviceCode) {
-			fmt.Printf("Go to %s and enter code: %s\n", dc.VerificationURI, dc.UserCode)
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Logged in as", user.Login, "id", user.ID, token)
-		*/
 		protocol.FrontendLineReader()
 		
 	}

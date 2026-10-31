@@ -12,7 +12,6 @@ import (
 
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
-// RequestDeviceCode starts the device flow. scope can be "" (public info only).
 func RequestDeviceCode(ctx context.Context, clientID, scope string) (*DeviceCode, error) {
 	form := url.Values{"client_id": {clientID}}
 	if scope != "" {
@@ -78,9 +77,7 @@ func PollForToken(ctx context.Context, clientID string, dc *DeviceCode) (string,
 			}
 			return out.AccessToken, nil
 		case "authorization_pending":
-			// user hasn't approved yet, keep polling
 		case "slow_down":
-			// GitHub asks us to back off
 			if out.Interval > 0 {
 				interval = time.Duration(out.Interval) * time.Second
 			} else {
@@ -96,8 +93,7 @@ func PollForToken(ctx context.Context, clientID string, dc *DeviceCode) (string,
 	}
 }
 
-// FetchUser asks GitHub who owns the token. This is the actual "verification":
-// GitHub itself vouches for the identity.
+// FetchUser asks GitHub who owns the token. This is the actual "verification"
 func FetchUser(ctx context.Context, token string) (*User, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, userURL, nil)
 	if err != nil {
@@ -130,9 +126,7 @@ func FetchUser(ctx context.Context, token string) (*User, error) {
 	return &u, nil
 }
 
-// Login runs the whole flow. onCode is called once so your UI can show the
-// code and open the browser, e.g. by showing dc.UserCode and opening
-// dc.VerificationURI.
+// The main function.
 func Login(ctx context.Context, clientID string, onCode func(*DeviceCode)) (token string, user *User, err error) {
 	dc, err := RequestDeviceCode(ctx, clientID, "") // no scope needed to verify identity
 	if err != nil {

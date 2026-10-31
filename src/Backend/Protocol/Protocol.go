@@ -2,6 +2,7 @@ package protocol
 
 import (
 	auth "Backend/Auth"
+	common "Backend/Common"
 	network "Backend/Network"
 	"bufio"
 	"context"
@@ -9,22 +10,30 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 /*
-This will talk to C++ front end through stdin-stdout+JSON
+This will talk to C++ frontend through stdin/stdout+JSON.
 */
 type Request struct {
 	Action      string `json:"action"`
 	Repo        string `json:"repo"`
 	Destination string `json:"destination"`
 	Platform    string `json:"platform"`
+
+	// this is for the zig convert stuff, omitempty will exclude these types when a repo is asked so it will not bring a error.
+	Amount      string `json:"amount"`
+	RequestType string `json:"requesttype"`
 }
 
 type Response struct {
 	Success bool   `json:"success"`
 	Version string `json:"version,omitempty"`
 	Error   string `json:"error,omitempty"`
+
+	// again for the zig convert stuff.
+	ReturnAmount string `json:"ReturnAmount,omitempty"`
 }
 
 type LoginResponse struct {
@@ -75,6 +84,8 @@ func FrontendLineReader() {
 			handleDownloadRelease(request)
 		case "login":
 			handleLogin()
+		case "convert":
+			handleConvert(request)
 		default:
 			writeResponse(Response{
 				Success: false,
@@ -86,6 +97,46 @@ func FrontendLineReader() {
 	// if scanner stopped because of crash/error
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "Backend stdin reading error: %v\n", err)
+	}
+}
+
+func handleConvert(request Request) {
+	val, _ := strconv.ParseFloat(request.Amount, 64)
+	switch request.RequestType {
+	case "gbtomb":
+		resp, err := common.FormatGBToMB(val)
+		if err != nil {
+			writeResponse(Response{
+				Success: false,
+				Error:   "formatting error"})
+			return
+		}
+		writeResponse(Response{
+			Success:      true,
+			Error:        "",
+			ReturnAmount: resp,
+		})
+
+	case "mbtogb":
+		resp, err := common.FormatMBToGB(val)
+		if err != nil {
+			writeResponse(Response{
+				Success: false,
+				Error:   "formatting error"})
+			return
+		}
+		writeResponse(Response{
+			Success:      true,
+			Error:        "",
+			ReturnAmount: resp,
+		})
+	default:
+		writeResponse(Response{
+			Success:      false,
+			Error:        "empty requesttype",
+			ReturnAmount: "",
+		})
+		return
 	}
 }
 
