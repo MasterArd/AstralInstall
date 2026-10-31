@@ -10,6 +10,7 @@
         <file>qml/Ui.qml</file>
         <file>qml/FilterCheckBox.qml</file>
         <file>qml/qmldir</file>
+        <file>assets/icons/AstralInstall_logo.png</file>
         <file>assets/symboles/dots.png</file>
         <file>assets/symboles/Githublogo.png</file>
         <file alias="assets/symboles/dropdown_down.png">assets/symboles/dropdown down.png</file>

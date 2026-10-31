@@ -9,11 +9,14 @@
 #include "settings.h"
 #include "testconsole.h"
 #include "gamefiltermodel.h"
+#include <QIcon>
 
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    app.setWindowIcon(QIcon(QStringLiteral(":/assets/icons/AstralInstall_logo.png")));
 
     // The native Windows style draws its own indicators and ignores
     // customizations (e.g. in FilterCheckBox.qml). "Basic" is fully
