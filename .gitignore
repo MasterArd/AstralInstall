@@ -17,3 +17,6 @@ tools/
 
 # Von Zig erzeugte statische Bibliothek fuer cgo
 src/Backend/Common/libformat.a*
+
+# assets
+assets/
