@@ -20,6 +20,32 @@ Item {
     property bool platformLinux: false
     property var genres: []
     property string version: ""
+    property string repo: ""
+
+    readonly property bool busy: installManager.busyGames.indexOf(card.name) !== -1
+    readonly property bool installed: installManager.installedNames.indexOf(card.name) !== -1
+    readonly property bool canInstall: card.repo !== "" && !card.busy && !card.installed
+    property string status: ""
+    property string error: ""
+
+    Connections {
+        target: installManager
+
+        function onStatusChanged(name, status) {
+            if (name === card.name)
+                card.status = status
+        }
+        function onInstallFinished(name) {
+            if (name === card.name)
+                card.status = ""
+        }
+        function onInstallFailed(name, error) {
+            if (name === card.name) {
+                card.status = ""
+                card.error = error
+            }
+        }
+    }
 
     readonly property real s: Math.max(0.7, Math.min(2.5, card.width / 300))
 
@@ -230,6 +256,54 @@ Item {
                         color: card.accentColor
                         text: "linux"
                         font.pixelSize: Math.round(12 * card.s)
+                    }
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: card.error !== "" && !card.busy
+                color: "#E08A8A"
+                text: card.error
+                font.pixelSize: Math.round(11 * card.s)
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+
+            // Install button
+            Rectangle {
+                id: installButton
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.round(30 * card.s)
+                color: card.canInstall && installHover.hovered ? card.lineColor : card.panelColor
+                border.color: card.canInstall ? card.accentColor : card.lineColor
+                border.width: 1
+
+                Behavior on color { ColorAnimation { duration: 120 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    color: card.canInstall ? card.textColor : card.mutedColor
+                    font.pixelSize: Math.round(13 * card.s)
+                    font.bold: true
+                    text: card.busy ? (card.status !== "" ? card.status : "Wird installiert...")
+                        : card.installed ? "Installiert"
+                        : card.repo === "" ? "Nicht verfügbar"
+                        : card.error !== "" ? "Erneut versuchen"
+                        : "Installieren"
+                }
+
+                HoverHandler {
+                    id: installHover
+                    cursorShape: card.canInstall ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
+
+                TapHandler {
+                    enabled: card.canInstall
+                    onTapped: {
+                        card.error = ""
+                        installManager.install(card.name, card.repo, card.banner)
                     }
                 }
             }

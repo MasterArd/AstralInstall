@@ -223,6 +223,7 @@ Rectangle {
                 platformLinux: model.platformLinux
                 genres: model.genres
                 version: model.version
+                repo: model.repo
             }
             Text {
                 anchors.centerIn: parent

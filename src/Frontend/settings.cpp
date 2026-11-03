@@ -1,11 +1,10 @@
 #include "settings.h"
+#include "paths.h"
 
-#include <QDir>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
-#include <QStandardPaths>
 
 namespace {
 
@@ -23,8 +22,7 @@ Settings::Settings(QObject *parent)
 
 QString Settings::filePath()
 {
-    const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    return QDir(dir).filePath(QStringLiteral("settings.json"));
+    return Paths::configFile();
 }
 
 void Settings::setPrimaryColor(const QColor &color)
@@ -69,4 +67,8 @@ void Settings::load()
                      "Expected \"#RRGGBB\" or an SVG color name.",
                      qUtf8Printable(primaryText), qUtf8Printable(m_primaryColor.name()));
     }
+
+    // { "library": { "gamesRoot": "D:/Games" } }
+    const QJsonObject library = root.value(QStringLiteral("library")).toObject();
+    Paths::setGamesRoot(library.value(QStringLiteral("gamesRoot")).toString());
 }

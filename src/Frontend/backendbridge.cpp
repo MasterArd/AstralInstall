@@ -1,4 +1,5 @@
 #include "backendbridge.h"
+#include "paths.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -70,6 +71,9 @@ bool BackendBridge::start()
         emit backendError(tr("Backend not found: %1").arg(path));
         return false;
     }
+
+    // not next to the exe, in program files the backend cant wrire anything
+    m_process.setWorkingDirectory(Paths::dataDir());
 
     // No arguments puts the backend straight into IPC mode.
     // (--debug would run its self tests instead.)

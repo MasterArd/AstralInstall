@@ -9,7 +9,10 @@
 #include "settings.h"
 #include "testconsole.h"
 #include "gamefiltermodel.h"
+#include "installmanager.h"
+#include "paths.h"
 #include <QIcon>
+#include <QLockFile>
 
 
 int main(int argc, char *argv[])
@@ -26,12 +29,21 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("AstralInstall"));
     QCoreApplication::setApplicationName(QStringLiteral("AstralInstall"));
 
+    // only one instance, else two install in the same foldet at once
+    QLockFile instanceLock(Paths::lockFile());
+    if (!instanceLock.tryLock(100)) {
+        qWarning("AstralInstall is already running");
+        return 0;
+    }
+
     GameManager gameManager;
     GameLibrary gameLibrary;
     BackendBridge backend;
+    // must be bevore installManager (settings can change games folder)
     Settings settings;
+    InstallManager installManager(&backend);
     // The console sends its commands over the same bridge as the UI.
-    TestConsole testConsole(&backend);
+    TestConsole testConsole(&backend, &installManager);
     GameFilterModel gameFilter;
 
     QObject::connect(&backend, &BackendBridge::releaseChecked,
@@ -47,6 +59,11 @@ int main(int argc, char *argv[])
     QObject::connect(&backend, &BackendBridge::backendError,
                      [](const QString &message) {
                          qWarning("[IPC] %s", qUtf8Printable(message));
+                     });
+    QObject::connect(&installManager, &InstallManager::installFailed,
+                     [](const QString &name, const QString &error) {
+                         qWarning("[Install] %s failed: %s",
+                                  qUtf8Printable(name), qUtf8Printable(error));
                      });
 
     // Fork the backend as a child process before the UI comes up.
@@ -65,6 +82,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("gameManager", &gameManager);
     engine.rootContext()->setContextProperty("gameLibrary", &gameLibrary);
     engine.rootContext()->setContextProperty("backend", &backend);
+    engine.rootContext()->setContextProperty("installManager", &installManager);
     engine.rootContext()->setContextProperty("testConsole", &testConsole);
 
     engine.rootContext()->setContextProperty("gameFilter", &gameFilter);

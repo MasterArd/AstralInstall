@@ -6,9 +6,12 @@
 #include <QStandardPaths>
 
 #include "backendbridge.h"
+#include "installmanager.h"
+#include "paths.h"
 
-TestConsole::TestConsole(BackendBridge *bridge, QWidget *parent)
-    : QDialog(parent), backend(bridge)
+TestConsole::TestConsole(BackendBridge *bridge, InstallManager *installManager,
+                         QWidget *parent)
+    : QDialog(parent), backend(bridge), installer(installManager)
 {
     setWindowTitle("Test Console");
     setGeometry(100, 100, 600, 400);
@@ -63,6 +66,36 @@ TestConsole::TestConsole(BackendBridge *bridge, QWidget *parent)
         connect(backend, &BackendBridge::backendMessage, this,
                 [this](const QString &text) {
                     print(QStringLiteral("  %1").arg(text));
+                });
+    }
+
+    if (installer) {
+        connect(installer, &InstallManager::statusChanged, this,
+                [this](const QString &name, const QString &status) {
+                    print(QStringLiteral("  %1: %2").arg(name, status));
+                });
+        connect(installer, &InstallManager::installFinished, this,
+                [this](const QString &name) {
+                    print(QStringLiteral("[ok] %1 installed to %2")
+                              .arg(name, installer->gameDir(name)));
+                });
+        connect(installer, &InstallManager::updateFinished, this,
+                [this](const QString &name) {
+                    print(QStringLiteral("[ok] %1 updated to %2")
+                              .arg(name, installer->installedVersion(name)));
+                });
+        connect(installer, &InstallManager::updateAvailable, this,
+                [this](const QString &name, const QString &version) {
+                    print(QStringLiteral("[ok] %1: update available (%2 -> %3)")
+                              .arg(name, installer->installedVersion(name), version));
+                });
+        connect(installer, &InstallManager::upToDate, this,
+                [this](const QString &name) {
+                    print(QStringLiteral("[ok] %1 is up to date").arg(name));
+                });
+        connect(installer, &InstallManager::installFailed, this,
+                [this](const QString &name, const QString &error) {
+                    print(QStringLiteral("[error] %1: %2").arg(name, error));
                 });
     }
 }
@@ -123,13 +156,7 @@ QString TestConsole::takeOption(QStringList &args, const QString &name,
 }
 
 QString TestConsole::currentPlatform() {
-#if defined(Q_OS_WIN)
-    return QStringLiteral("windows");
-#elif defined(Q_OS_MACOS)
-    return QStringLiteral("darwin");
-#else
-    return QStringLiteral("linux");
-#endif
+    return InstallManager::currentPlatform();
 }
 
 QString TestConsole::defaultDestination() {
@@ -196,6 +223,89 @@ void TestConsole::handleDownload(QStringList args) {
     backend->downloadNewest(repo, platform, destination);
 }
 
+void TestConsole::handleInstall(const QStringList &args) {
+    if (args.size() != 2) {
+        print(QStringLiteral("Usage: install <name> <repo-url>\n"
+                             "  Quote names with spaces: install \"My Game\" https://...\n"));
+        return;
+    }
+    if (!installer) {
+        print(QStringLiteral("No install manager connected.\n"));
+        return;
+    }
+
+    print(QStringLiteral("Installing %1 from %2 ...").arg(args.at(0), args.at(1)));
+    installer->install(args.at(0), args.at(1));
+}
+
+void TestConsole::handleInstallZip(QStringList args) {
+    const QString version = takeOption(args, QStringLiteral("version"));
+    if (args.size() != 2) {
+        print(QStringLiteral("Usage: installzip <name> <path.zip> [version=<v>]\n"
+                             "  Installs from a local zip, without GitHub.\n"));
+        return;
+    }
+    if (!installer) {
+        print(QStringLiteral("No install manager connected.\n"));
+        return;
+    }
+
+    print(QStringLiteral("Installing %1 from %2 ...").arg(args.at(0), args.at(1)));
+    installer->installFromArchive(args.at(0), args.at(1), version);
+}
+
+void TestConsole::handleGameCommand(const QString &command, QStringList args) {
+    const QString keepSaves = takeOption(args, QStringLiteral("keepsaves"),
+                                         QStringLiteral("yes"));
+    if (args.size() != 1) {
+        print(QStringLiteral("Usage: %1 <name>%2\n")
+                  .arg(command, command == QLatin1String("uninstall")
+                                    ? QStringLiteral(" [keepsaves=yes|no]")
+                                    : QString()));
+        return;
+    }
+    if (!installer) {
+        print(QStringLiteral("No install manager connected.\n"));
+        return;
+    }
+
+    const QString name = args.first();
+    if (command == QLatin1String("update")) {
+        print(QStringLiteral("Updating %1 ...").arg(name));
+        installer->update(name);
+    } else if (command == QLatin1String("checkupdate")) {
+        print(QStringLiteral("Checking %1 for updates ...").arg(name));
+        installer->checkForUpdate(name);
+    } else if (command == QLatin1String("uninstall")) {
+        const bool keep = keepSaves.compare(QLatin1String("no"), Qt::CaseInsensitive) != 0;
+        if (installer->uninstall(name, keep))
+            print(QStringLiteral("[ok] %1 removed%2").arg(name, keep ? QStringLiteral(", saves kept")
+                                                                     : QString()));
+        else
+            print(QStringLiteral("[error] %1 is not installed or could not be removed").arg(name));
+    }
+}
+
+void TestConsole::printGames() {
+    print(QStringLiteral("Data:  %1\nGames: %2")
+              .arg(QDir::toNativeSeparators(Paths::dataDir()),
+                   QDir::toNativeSeparators(Paths::gamesRoot())));
+    if (!installer)
+        return;
+
+    const QVariantList games = installer->installedGames();
+    if (games.isEmpty())
+        print(QStringLiteral("  (no games installed)"));
+    for (const QVariant &entry : games) {
+        const QVariantMap game = entry.toMap();
+        print(QStringLiteral("  %1  %2  %3")
+                  .arg(game.value(QStringLiteral("name")).toString(),
+                       game.value(QStringLiteral("version")).toString(),
+                       game.value(QStringLiteral("path")).toString()));
+    }
+    print(QString());
+}
+
 void TestConsole::processCommand(const QString &cmd) {
     QStringList tokens = tokenize(cmd);
     if (tokens.isEmpty())
@@ -211,6 +321,14 @@ void TestConsole::processCommand(const QString &cmd) {
             "  download <repo-url> [dest=<path>] [platform=<hint>]\n"
             "      Download the newest release. Quote paths that contain\n"
             "      spaces: dest=\"C:\\Program Files\\App\"\n"
+            "  install <name> <repo-url>\n"
+            "      Download and install the newest release zip.\n"
+            "  installzip <name> <path.zip> [version=<v>]\n"
+            "      Install from a local zip.\n"
+            "  update <name>      checkupdate <name>\n"
+            "  uninstall <name> [keepsaves=yes|no]\n"
+            "  games\n"
+            "      List installed games and the data folders.\n"
             "  clear\n"
             "  exit\n"));
         return;
@@ -221,6 +339,23 @@ void TestConsole::processCommand(const QString &cmd) {
     }
     if (name == QLatin1String("download")) {
         handleDownload(tokens);
+        return;
+    }
+    if (name == QLatin1String("install")) {
+        handleInstall(tokens);
+        return;
+    }
+    if (name == QLatin1String("installzip")) {
+        handleInstallZip(tokens);
+        return;
+    }
+    if (name == QLatin1String("update") || name == QLatin1String("checkupdate")
+        || name == QLatin1String("uninstall")) {
+        handleGameCommand(name, tokens);
+        return;
+    }
+    if (name == QLatin1String("games")) {
+        printGames();
         return;
     }
     if (name == QLatin1String("clear")) {

@@ -35,6 +35,7 @@ public:
         PlatformLinuxRole,
         GenresRole,
         VersionRole,
+        RepoRole,
     };
 
     explicit GameLibrary(QObject *parent = nullptr);
@@ -74,6 +75,7 @@ private:
         bool platformLinux = false;
         QStringList genres;
         QString version;
+        QString repo;
     };
 
     QVector<Game> m_games;

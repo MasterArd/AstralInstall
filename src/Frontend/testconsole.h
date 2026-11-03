@@ -7,6 +7,7 @@
 #include <QStringList>
 
 class BackendBridge;
+class InstallManager;
 
 class TestConsole : public QDialog {
     Q_OBJECT
@@ -14,7 +15,9 @@ class TestConsole : public QDialog {
 public:
     // The bridge pointer may be null - then only the local commands
     // run, and the backend commands report back with an error line.
-    explicit TestConsole(BackendBridge *bridge = nullptr, QWidget *parent = nullptr);
+    explicit TestConsole(BackendBridge *bridge = nullptr,
+                         InstallManager *installer = nullptr,
+                         QWidget *parent = nullptr);
 
 private slots:
     void onReturnPressed();
@@ -23,6 +26,10 @@ private:
     void processCommand(const QString &cmd);
     void handleCheck(const QStringList &args);
     void handleDownload(QStringList args);
+    void handleInstall(const QStringList &args);
+    void handleInstallZip(QStringList args);
+    void handleGameCommand(const QString &command, QStringList args);
+    void printGames();
     void print(const QString &text);
 
     // Splits an input line into tokens. Quotes keep together what
@@ -43,6 +50,7 @@ private:
     QPlainTextEdit *output;
     QLineEdit *input;
     BackendBridge *backend;
+    InstallManager *installer;
 };
 
 #endif // TESTCONSOLE_H

@@ -7,16 +7,7 @@ Rectangle {
     id: root
     color: Colors.bgColor
 
-    property var gamesModel: gamesList
-
-    ListModel {
-        id: gamesList
-
-        ListElement {
-            name: "Test_Name"
-            banner: "https://github.com/Hannes-swd/Astrallinstall_Template/raw/main/AstralInstall/Banner.png"
-        }
-    }
+    property var gamesModel: installManager.installedGames
 
     Rectangle {
         width: parent.width
@@ -45,12 +36,14 @@ Rectangle {
                 cellHeight: 280
 
                 delegate: MyGameCard {
-                    required property var model
+                    required property var modelData
 
                     width: gamesGrid.cellWidth
                     height: gamesGrid.cellHeight
-                    name: model.name
-                    banner: model.banner
+                    name: modelData.name
+                    banner: modelData.banner || ""
+                    version: modelData.version || ""
+                    repo: modelData.repo || ""
                 }
 
                 Text {

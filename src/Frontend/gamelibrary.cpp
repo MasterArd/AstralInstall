@@ -22,6 +22,7 @@ constexpr auto keyplatform_windows = "platform_windows";
 constexpr auto keyplatform_linux = "platform_linux";
 constexpr auto KeyGenres = "genres";
 constexpr auto KeyVersion = "Game_version";
+constexpr auto KeyRepo = "repo"; // github url, without it no install button
 
 const QString FileName = QStringLiteral("games.json");
 
@@ -91,6 +92,7 @@ QVariant GameLibrary::data(const QModelIndex &index, int role) const
     case PlatformLinuxRole:   return game.platformLinux;
     case GenresRole:      return game.genres;
     case VersionRole:     return game.version;
+    case RepoRole:        return game.repo;
     default:              return QVariant();
     }
 }
@@ -107,6 +109,7 @@ QHash<int, QByteArray> GameLibrary::roleNames() const
         {PlatformLinuxRole,   "platformLinux"},
         {GenresRole,      "genres"},
         {VersionRole,     "version"},
+        {RepoRole,        "repo"},
     };
 }
 
@@ -133,6 +136,7 @@ void GameLibrary::setGames(const QJsonArray &games)
         game.platformLinux = boolField(object, keyplatform_linux);
         game.genres = stringListField(object, KeyGenres);
         game.version = stringField(object, KeyVersion);
+        game.repo = stringField(object, KeyRepo);
 
         if (game.name.isEmpty())
             qWarning("[GameLibrary] an entry has no \"%s\"", KeyName);
