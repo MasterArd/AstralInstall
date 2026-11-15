@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"crypto/sha256"
 )
 
 /*
@@ -174,7 +175,7 @@ func handleLogin() {
 		log.Fatal(err)
 	}
 	fmt.Println("Logged in as", user.Login, "id", user.ID, token)
-	data := fmt.Appendf(nil, "ID: %d, Login: %s, Token: %s", user.ID, user.Login, token)
+	data := fmt.Appendf(nil, "ID: %d, Login: %s, Tokenhash: %x", user.ID, user.Login, sha256.Sum256([]byte(token)))
 	os.WriteFile("log.log", data, 0644)
 }
 
