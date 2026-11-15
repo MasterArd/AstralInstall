@@ -15,7 +15,7 @@ NATIVE_LIBRARY := $(BACKEND_DIR)/Common/libformat.a
 NATIVE_OBJECT := $(BACKEND_DIR)/Common/libformat.a.o
 NATIVE_SOURCE := $(BACKEND_DIR)/Common/Convert.zig
 BACKEND_BINARY := $(BACKEND_BUILD_DIR)/Backend
-FRONTEND_BINARY := $(FRONTEND_BUILD_DIR)/AstralInstal
+FRONTEND_BINARY := $(FRONTEND_BUILD_DIR)/AstralInstall
 
 ifeq ($(OS),Windows_NT)
 BACKEND_BINARY := $(BACKEND_BINARY).exe
