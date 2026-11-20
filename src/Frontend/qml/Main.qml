@@ -361,7 +361,8 @@ Window {
                       ? "Waiting..."
                       : root.githubLoginName === "" ? "GitHub" : root.githubLoginName
 
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: contentItem.implicitWidth
+                padding: 0
                 Layout.preferredHeight: 26
                 Layout.alignment: Qt.AlignVCenter
 
@@ -380,6 +381,7 @@ Window {
                 contentItem: Row {
                     spacing: 6
                     leftPadding: 10
+                    rightPadding: 10
                     Image {
                         source: "qrc:/assets/symboles/Githublogo.png"
                         sourceSize.width: 14
