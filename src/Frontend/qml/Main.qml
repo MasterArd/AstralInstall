@@ -18,6 +18,12 @@ Window {
     property string githubLoginUrl: ""
     property string githubUserCode: ""
 
+    function copyUserCode() {
+        userCodeField.selectAll()
+        userCodeField.copy()
+        userCodeField.deselect()
+    }
+
     Connections {
         target: backend
 
@@ -92,6 +98,7 @@ Window {
                 border.width: 1
 
                 TextEdit {
+                    id: userCodeField
                     anchors.centerIn: parent
                     text: root.githubUserCode
                     color: Colors.accentColor
@@ -100,7 +107,12 @@ Window {
                     font.letterSpacing: 2
                     readOnly: true
                     selectionColor: Colors.lineColor
-                    selectByMouse: true
+                }
+                //on klick it coppys the code
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.copyUserCode()
                 }
             }
             RowLayout {
