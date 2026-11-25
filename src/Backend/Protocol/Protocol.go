@@ -64,8 +64,6 @@ func FrontendLineReader() {
 	for scanner.Scan() {
 		var request Request
 		rawBytes := scanner.Bytes()
-
-		// skip empty lines if c++ sends blank line
 		if len(rawBytes) == 0 {
 			continue
 		}

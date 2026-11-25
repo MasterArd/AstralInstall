@@ -12,6 +12,7 @@ src/Backend/log.log
 HANDOFF-Firebase-Auth.md
 auth.json
 
+
 # Zig-Toolchain, die CMake bei Bedarf selbst herunterlaedt
 tools/
 
