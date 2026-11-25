@@ -97,18 +97,32 @@ Window {
                 border.color: Colors.lineColor
                 border.width: 1
 
-                TextEdit {
-                    id: userCodeField
+                RowLayout {
                     anchors.centerIn: parent
-                    text: root.githubUserCode
-                    color: Colors.accentColor
-                    font.pixelSize: 28
-                    font.bold: true
-                    font.letterSpacing: 2
-                    readOnly: true
-                    selectionColor: Colors.lineColor
+                    spacing: 12
+
+                    TextEdit {
+                        id: userCodeField
+                        text: root.githubUserCode
+                        color: Colors.accentColor
+                        font.pixelSize: 28
+                        font.bold: true
+                        font.letterSpacing: 2
+                        readOnly: true
+                        selectionColor: Colors.lineColor
+                    }
+
+                    // copy image
+                    Image {
+                        source: "qrc:/assets/symboles/coppy.png"
+                        sourceSize.width: 30
+                        sourceSize.height: 30
+                        width: 30
+                        height: 30
+                    }
                 }
-                //on klick it coppys the code
+
+                // on click it copies the code
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
