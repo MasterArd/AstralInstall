@@ -18,6 +18,12 @@ Window {
     property string githubLoginUrl: ""
     property string githubUserCode: ""
 
+    function copyUserCode() {
+        userCodeField.selectAll()
+        userCodeField.copy()
+        userCodeField.deselect()
+    }
+
     Connections {
         target: backend
 
@@ -91,16 +97,36 @@ Window {
                 border.color: Colors.lineColor
                 border.width: 1
 
-                TextEdit {
+                RowLayout {
                     anchors.centerIn: parent
-                    text: root.githubUserCode
-                    color: Colors.accentColor
-                    font.pixelSize: 28
-                    font.bold: true
-                    font.letterSpacing: 2
-                    readOnly: true
-                    selectionColor: Colors.lineColor
-                    selectByMouse: true
+                    spacing: 12
+
+                    TextEdit {
+                        id: userCodeField
+                        text: root.githubUserCode
+                        color: Colors.accentColor
+                        font.pixelSize: 28
+                        font.bold: true
+                        font.letterSpacing: 2
+                        readOnly: true
+                        selectionColor: Colors.lineColor
+                    }
+
+                    // copy image
+                    Image {
+                        source: "qrc:/assets/symboles/coppy.png"
+                        sourceSize.width: 30
+                        sourceSize.height: 30
+                        width: 30
+                        height: 30
+                    }
+                }
+
+                // on click it copies the code
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.copyUserCode()
                 }
             }
             RowLayout {
