@@ -114,7 +114,7 @@ Window {
 
                     // copy image
                     Image {
-                        source: "qrc:/assets/symboles/coppy.png"
+                        source: "qrc:/assets/symboles/copy.png"
                         sourceSize.width: 30
                         sourceSize.height: 30
                         width: 30
